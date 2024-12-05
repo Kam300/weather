@@ -1,0 +1,128 @@
+<resources>
+    <string name="app_name">WeatherTyre</string>
+    <string name="error_title">Ошибка</string>
+    <string name="error_message_location_permission">Разрешение на доступ к местоположению не предоставлено.</string>
+    <string name="error_message_fetch_data">Ошибка загрузки данных. Попробуйте снова.</string>
+    <string name="download_success">Скачивание завершено!</string>
+    <string name="downloading_update">Скачивание новой версии...</string>
+    <string name="now_downloading_update">Скачивание началось...</string>
+    <string name="no_update_available">Вы используете последнюю версию.</string>
+
+    <string name="update_available">Доступно обновление</string>
+    <string name="update_dialog_message">Доступна новая версия. Хотели бы вы ее скачать?</string>
+    <string name="no_city_selected">Пожалуйста, выберите город.</string>
+    <string name="city_prefix">Город: </string>
+    <string name="last_updated">Последнее обновление</string>
+    <string name="recommendation_initial_text">Выберите местоположение</string>
+    <string name="weather_status_default">Статус погоды</string>
+    <string name="last_updated_prompt">Последнее обновление: </string>
+    <string name="information_button_description">Информация</string>
+    <string name="select_city_button_text">Выбрать город</string>
+    <string name="complete_download">Скачивание завершено!</string>
+
+    <string name="error_download">Ошибка при скачивании.</string>
+    <string name="access_ermission">Разрешение на доступ к хранилищу предоставлено.</string>
+    <string name="denied_ermission">Разрешение на доступ к хранилищу отклонено.</string>
+    <string name="get_your_current_location">Не удалось получить ваше текущее местоположение. Пожалуйста, выберите город.</string>
+
+
+    <string name="recommend_winter_tyres">Рекомендуется сменить на зимние колеса.</string>
+    <string name="recommend_winter_tyres_rainy">Холодно и дождливо, рекомендуется зимние колеса.</string>
+    <string name="recommend_all_seasons">Лучше использовать всесезонные или зимние колеса.</string>
+    <string name="recommend_summer_tyres">Рекомендуется сменить на летние колеса.</string>
+    <string name="consider_condition">Погода теплолно и дождливо, учитывайте состояние дороги.</string>
+    <string name="weather_unstable">Состояние погоды нестабильное, следите за обновлениями.</string>
+    <string name="current_location_option">Определить местоположение</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
+    <string name="back">Назад</string>
+    <string name="no_network">Отсутствует интернет-соединение</string>
+    <string name="notifications">Загрузка обновления</string>
+    <string name="recommend_winter_tyres_studded">Рекомендуется сменить на всесезонные или шипованные колеса.</string>
+
+
+    <!-- City names -->
+    <string name="city_current_location">Определить местоположение</string>
+    <string name="city_moscow">Москва</string>
+    <string name="city_saint_petersburg">Санкт-Петербург</string>
+    <string name="city_kazan">Казань</string>
+    <string name="city_novosibirsk">Новосибирск</string>
+    <string name="city_yekaterinburg">Екатеринбург</string>
+    <string name="city_nizhny_novgorod">Нижний Новгород</string>
+    <string name="city_chelyabinsk">Челябинск</string>
+    <string name="city_samara">Самара</string>
+    <string name="city_ufa">Уфа</string>
+    <string name="city_rostov_on_don">Ростов-на-Дону</string>
+    <string name="city_voronezh">Воронеж</string>
+    <string name="city_krasnoyarsk">Красноярск</string>
+    <string name="city_tolyatti">Тольятти</string>
+    <string name="city_izhevsk">Ижевск</string>
+    <string name="city_barnaul">Барнаул</string>
+    <string name="city_magnitogorsk">Магнитогорск</string>
+
+    <string name="save_button_text">Сохранить</string>
+    <string name="cancel_button_text">Отмена</string>
+
+
+
+
+        <string name="weather_clear">Ясно</string>
+        <string name="weather_partly_cloudy">Частично облачно</string>
+        <string name="weather_cloudy">Облачно</string>
+        <string name="weather_overcast">Пасмурно</string>
+        <string name="weather_mist">Мгла</string>
+        <string name="weather_fog">Туман</string>
+        <string name="weather_sand">Песчаная буря</string>
+        <string name="weather_dust">Пыльная буря</string>
+        <string name="weather_ash">Пепел</string>
+        <string name="weather_snow">Снег</string>
+        <string name="weather_snow_showers">Снегопады</string>
+        <string name="weather_hail">Град</string>
+        <string name="weather_sleet">Дождь со снегом</string>
+        <string name="weather_rain">Дождь</string>
+        <string name="weather_rain_showers">Ливни</string>
+        <string name="weather_thunderstorm">Гроза</string>
+        <string name="weather_tornado">Торнадо</string>
+        <string name="weather_hurricane">Ураган</string>
+        <string name="weather_tropical_storm">Тропический шторм</string>
+        <string name="weather_cold">Холодно</string>
+        <string name="weather_hot">Жарко</string>
+        <string name="weather_very_hot">Очень жарко</string>
+        <string name="weather_very_cold">Очень холодно</string>
+        <string name="weather_blizzard">Метель</string>
+        <string name="weather_extreme_cold">Экстремальный холод</string>
+        <string name="weather_moderate_rain">Умеренный дождь</string>
+        <string name="weather_light_snow">Легкий снегопад</string>
+        <string name="weather_moderate_snow">Умеренный снегопад</string>
+        <string name="weather_heavy_snow">Сильный снегопад</string>
+        <string name="weather_patchy_snow_poss">Возможен кратковременный снегопад</string>
+        <string name="weather_light_snow_showers">Небольшой снежный дождь</string>
+        <string name="weather_sunny">Cолнечно</string>
+        <string name="weather_freezing_fog">Ледяной туман</string>
+
+    <!-- About Screen Texts -->
+    <string name="about_title">О приложении</string>
+    <string name="about_developer">Разработчик: Kam300</string>
+    <string name="about_telegram_link">Подписаться в телеграмм</string>
+    <string name="about_check_updates">Проверить обновления</string>
+    <string name="about_go_to_website">Перейти на сайт</string>
+    <string name="about_theme_settings">Настройки темы</string>
+
+
+    <string name="temaa_about">Выберите тему</string>
+    <string name="temaa_night">Темная тема</string>
+    <string name="temaa_lite">Светлая тема</string>
+<string name="select_weather_source">Источники</string>
+
+    <string name="current_weather_source">Выбор источника %1$s</string>
+    <string name="source_unavailable">%1$s недоступен, переключение на другой источник.</string>
+    <string name="select_language">Выбор языка</string>
+
+    <string name="restart_required">Требуется перезагрузка</string>
+    <string name="restart_app_message">Чтобы применить новый язык, приложение необходимо перезапустить. Хотите перезапустить сейчас?</string>
+    <string name="restart">Перезапуск</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="it_feels_like">Ощущается как:</string>
+
+</resources>

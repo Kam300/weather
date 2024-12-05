@@ -1,0 +1,7 @@
+<resources>
+    <color name="black">#2E2B2B</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="holo_blue_dark">#FF33B5E5</color>
+    <color name="button_background">#FF33B5E5</color> <!-- Light theme button background -->
+    <color name="color_background">#03FB90</color>
+</resources>

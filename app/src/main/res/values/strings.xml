@@ -1,0 +1,130 @@
+<resources>
+    <string name="app_name">WeatherTyre</string>
+    <string name="error_title">Error</string>
+    <string name="error_message_location_permission">Location permission not granted.</string>
+    <string name="error_message_fetch_data">Data loading error. Please try again.</string>
+    <string name="download_success">Download completed!</string>
+    <string name="downloading_update">Downloading new version...</string>
+    <string name="now_downloading_update">The download has started...</string>
+    <string name="no_update_available">You are using the latest version.</string>
+    <string name="update_available">Update available</string>
+    <string name="update_dialog_message">A new version is available. Would you like to download it?</string>
+    <string name="no_city_selected">Please select a city.</string>
+    <string name="city_prefix">City: </string>
+    <string name="last_updated">Last updated</string>
+    <string name="recommendation_initial_text">Select a location</string>
+    <string name="weather_status_default">Weather status</string>
+    <string name="last_updated_prompt">Last updated: </string>
+    <string name="information_button_description">Information</string>
+    <string name="select_city_button_text">Select City</string>
+    <string name="complete_download">The download is The download is complete!!</string>
+    <string name="error_download">Download error.</string>
+
+    <string name="recommend_winter_tyres_studded">It is recommended to change to all-season or studded wheels.</string>
+    <string name="recommend_winter_tyres">Recommended to switch to winter tyres.</string>
+    <string name="recommend_winter_tyres_rainy">Cold and rainy, winter tyres are recommended.</string>
+    <string name="recommend_all_seasons">It’s better to use all-season or winter tyres.</string>
+    <string name="recommend_summer_tyres">Recommended to switch to summer tyres.</string>
+    <string name="consider_condition">The weather is warm and rainy, consider road conditions.</string>
+    <string name="weather_unstable">The weather is unstable, keep an eye on updates.</string>
+    <string name="current_location_option">Determine location</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="back">Back</string>
+    <string name="no_network">There is no internet connection</string>
+
+    <string name="notifications">Downloading Update</string>
+    <string name="access_ermission">Permission to access the storage has been granted.</string>
+    <string name="denied_ermission">Permission to access the storage has been denied.</string>
+    <string name="get_your_current_location">Couldn t get your current location. Please select a city.</string>
+
+
+
+    <!-- City names -->
+    <string name="city_current_location">Determine location</string>
+    <string name="city_moscow">Moscow</string>
+    <string name="city_saint_petersburg">Saint Petersburg</string>
+    <string name="city_kazan">Kazan</string>
+    <string name="city_novosibirsk">Novosibirsk</string>
+    <string name="city_yekaterinburg">Yekaterinburg</string>
+    <string name="city_nizhny_novgorod">Nizhny Novgorod</string>
+    <string name="city_chelyabinsk">Chelyabinsk</string>
+    <string name="city_samara">Samara</string>
+    <string name="city_ufa">Ufa</string>
+    <string name="city_rostov_on_don">Rostov-on-Don</string>
+    <string name="city_voronezh">Voronezh</string>
+    <string name="city_krasnoyarsk">Krasnoyarsk</string>
+    <string name="city_tolyatti">Tolyatti</string>
+    <string name="city_izhevsk">Izhevsk</string>
+    <string name="city_barnaul">Barnaul</string>
+    <string name="city_magnitogorsk">Magnitogorsk</string>
+
+    <!--  кнопка отмена и сохранить-->
+      <string name="save_button_text">Save</string>
+      <string name="cancel_button_text">Cancel</string>
+
+
+
+
+          <string name="weather_clear">Clear</string>
+          <string name="weather_partly_cloudy">Partly cloudy</string>
+          <string name="weather_cloudy">Cloudy</string>
+          <string name="weather_overcast">Overcast</string>
+          <string name="weather_mist">Mist</string>
+          <string name="weather_fog">Fog</string>
+          <string name="weather_sand">Sand</string>
+          <string name="weather_dust">Dust</string>
+          <string name="weather_ash">Ash</string>
+          <string name="weather_snow">Snow</string>
+          <string name="weather_snow_showers">Snow showers</string>
+          <string name="weather_hail">Hail</string>
+          <string name="weather_sleet">Sleet</string>
+          <string name="weather_rain">Rain</string>
+          <string name="weather_rain_showers">Rain showers</string>
+          <string name="weather_thunderstorm">Thunderstorm</string>
+          <string name="weather_tornado">Tornado</string>
+          <string name="weather_hurricane">Hurricane</string>
+          <string name="weather_tropical_storm">Tropical storm</string>
+          <string name="weather_cold">Cold</string>
+          <string name="weather_hot">Hot</string>
+          <string name="weather_very_hot">Very hot</string>
+          <string name="weather_very_cold">Very cold</string>
+          <string name="weather_blizzard">Blizzard</string>
+          <string name="weather_extreme_cold">Extreme cold</string>
+          <string name="weather_moderate_rain">Moderate rain</string>
+          <string name="weather_light_snow">Light snow</string>
+          <string name="weather_moderate_snow">Moderate snow</string>
+          <string name="weather_heavy_snow">Heavy snow</string>
+          <string name="weather_patchy_snow_poss">Patchy snow possible</string>
+          <string name="weather_light_snow_showers">Light snow showers</string>
+          <string name="weather_sunny">Sunny</string>
+    <string name="weather_freezing_fog">Freezing fog</string>
+
+    <!-- About Screen Texts -->
+    <string name="about_title">About App</string>
+    <string name="about_developer">Developer: Kam300</string>
+    <string name="about_telegram_link">Subscribe on Telegram</string>
+    <string name="about_check_updates">Check for Updates</string>
+    <string name="about_go_to_website">Go to Website</string>
+    <string name="about_theme_settings">Theme Settings</string>
+
+
+    <string name="temaa_about">Сhoose a theme</string>
+    <string name="temaa_night">Dark theme</string>
+    <string name="temaa_lite">Light theme</string>
+
+    <string name="select_weather_source">Sources</string>
+    <string name="current_weather_source">Choosing a source %1$s</string>
+    <string name="source_unavailable">%1$s unavailable, switching to another source.</string>
+
+    <string name="it_feels_like">It feels like:</string>
+
+        <string name="select_language">Select Language</string>
+        <string name="restart_required">Restart Required</string>
+        <string name="restart_app_message">The application needs to be restarted to apply the new language. Would you like to restart now?</string>
+        <string name="restart">Restart</string>
+        <string name="cancel">Cancel</string>
+        <!-- Other strings as needed... -->
+
+
+</resources>
