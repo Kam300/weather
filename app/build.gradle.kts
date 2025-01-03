@@ -1,3 +1,4 @@
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,9 +6,11 @@ plugins {
 
 android {
 
+    viewBinding {
+        enable = true // Исправьте строку 10 таким образом, чтобы использовать assignment, а не comparison
+    }
     namespace = "com.example.weather"
-
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.weather"
@@ -37,27 +40,34 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
+
+
+
     kotlinOptions {
         jvmTarget = "1.8"
     }
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx) // Simplified to use the latest version as defined in libs
-    implementation(libs.okhttp) // Ensure this points to the correct version in your libs
-    implementation(libs.gson) // Ensure this points to the correct version in your libs
+    implementation ("com.yandex.android:mobileads:7.8.1")
+
+    implementation(libs.androidx.core.ktx) // Up-to-date version
+    implementation(libs.okhttp) // Ensure this points to the correct version
+    implementation(libs.gson) // Ensure this points to the correct version
     implementation(libs.androidx.drawerlayout)
     implementation(libs.glide)
-    implementation(libs.gms.play.services.location)
+    implementation(libs.gms.play.services.location) // Если не требуется, также можно удалить
     implementation(libs.cardview)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.swiperefreshlayout)
-    implementation ("com.squareup.okhttp3:okhttp:4.9.3")
+    implementation ("com.squareup.okhttp3:okhttp:4.12.0")
+
     // Testing libraries
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
+

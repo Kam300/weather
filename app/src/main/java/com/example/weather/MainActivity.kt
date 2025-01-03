@@ -10,7 +10,9 @@ import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.util.Log
 import android.view.View
+import android.view.ViewTreeObserver
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
@@ -33,15 +35,25 @@ import kotlin.concurrent.thread
 import com.bumptech.glide.Glide
 import android.widget.ListView
 import android.widget.ImageButton
+import android.widget.ScrollView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.example.weather.databinding.ActivityMainBinding
 import com.google.gson.Gson
+import com.yandex.mobile.ads.banner.BannerAdEventListener
+import com.yandex.mobile.ads.banner.BannerAdSize
+import com.yandex.mobile.ads.banner.BannerAdView
+import com.yandex.mobile.ads.common.AdRequest
+import com.yandex.mobile.ads.common.AdRequestError
+import com.yandex.mobile.ads.common.ImpressionData
+import com.yandex.mobile.ads.common.MobileAds
 import java.io.File
 import java.io.IOException
 import java.util.Locale
+import kotlin.math.roundToInt
 
 private lateinit var fusedLocationClient: FusedLocationProviderClient
 private val currentVersion = "1.0.8"
@@ -58,13 +70,43 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
 
+    private var bannerAd: BannerAdView? = null
+    private lateinit var binding: ActivityMainBinding
+
+    private val adSize: BannerAdSize
+        get() {
+            // Calculate the width of the ad, taking into account the padding in the ad container.
+            var adWidthPixels = binding.banner.width
+            if (adWidthPixels == 0) {
+                // If the ad hasn't been laid out, default to the full screen width
+                adWidthPixels = resources.displayMetrics.widthPixels
+            }
+            val adWidth = (adWidthPixels / resources.displayMetrics.density).roundToInt()
+
+            // Возвращаем "липкий" размер для отображения рекламы внизу экрана
+            return BannerAdSize.stickySize(this, adWidth)
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         setLocale(getSavedLanguage()) // Set the language before super
         super.onCreate(savedInstanceState)
 
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
+        // Инициализация View Binding
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
+        binding.banner.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                binding.banner.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                bannerAd = loadBannerAd(adSize)
+            }
+        })
+
+        MobileAds.initialize(this) {
+            println("YandexAds initialized")
+        }
+
+        enableEdgeToEdge()
 
         // Инициализация ваших компонентов
         cityText = findViewById(R.id.cityText)
@@ -74,14 +116,26 @@ class MainActivity : AppCompatActivity() {
         progressBar = findViewById(R.id.progressBar)
         lastUpdatedText = findViewById(R.id.lastUpdatedText)
 
-        // Инициализация SwipeRefreshLayout
+
+        val scrollView = findViewById<ScrollView>(R.id.scrollView) // Инициализация ScrollView
+
+        scrollView.setOnScrollChangeListener { _, scrollX, scrollY, oldScrollX, oldScrollY ->
+            // Проверяем, что ScrollView в верхней части
+            if (scrollY == 0) {
+                swipeRefreshLayout.isEnabled = true // Включаем SwipeRefreshLayout
+            } else {
+                swipeRefreshLayout.isEnabled = false // Отключаем SwipeRefreshLayout
+            }
+        }
+
+// Инициализация SwipeRefreshLayout
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
         swipeRefreshLayout.setOnRefreshListener {
             val currentCity = cityText.text.toString().removePrefix(getString(R.string.city_prefix)).trim()
             if (currentCity.isNotEmpty()) {
                 fetchWeatherData(currentCity)
             } else {
-                showError(getString(R.string.no_city_selected)) //Пожалуйста, выберите город.
+                showError(getString(R.string.no_city_selected)) // Пожалуйста, выберите город.
                 swipeRefreshLayout.isRefreshing = false
             }
         }
@@ -125,6 +179,49 @@ class MainActivity : AppCompatActivity() {
         getCurrentLocation()
     }
 
+    private fun loadBannerAd(adSize: BannerAdSize): BannerAdView {
+        return binding.banner.apply {
+            setAdSize(adSize)
+            setAdUnitId("demo-banner-yandex")
+            setBannerAdEventListener(object : BannerAdEventListener {
+                override fun onAdLoaded() {
+                    // Проверка на destroyed перед использованием
+                    if (isDestroyed) {
+                        bannerAd?.destroy()
+                        return
+                    }
+                    println("YandexAds загружена")
+                }
+
+                override fun onAdFailedToLoad(adRequestError: AdRequestError) {
+                    println("YandexAds ошибка") // Логирование ошибки
+                    Log.e("AdsError", "YandexAds ошибка: ${adRequestError.toString()}")
+                }
+
+                override fun onAdClicked() {
+                    println("YandexAds реклама нажата")
+                }
+
+                override fun onLeftApplication() {
+                    println("YandexAds реклама после нажатии")
+                }
+
+                override fun onReturnedToApplication() {
+                    println("YandexAds возрат пользователя")
+                }
+
+                override fun onImpression(impressionData: ImpressionData?) {
+                    impressionData?.let {
+                        println("YandexAds регистрация показа " + it.rawData)
+                    }
+                }
+            })
+            loadAd(
+                AdRequest.Builder()
+                    .build()
+            )
+        }
+    }
 
 
     private fun checkForUpdates() {
