@@ -541,17 +541,19 @@ class MainActivity : AppCompatActivity() {
                         saveCurrentCity(cityName)
                         runOnUiThread {
                             progressBar.visibility = View.GONE
-                            swipeRefreshLayout.isRefreshing = false  // Скрываем индикатор обновления
+                            swipeRefreshLayout.isRefreshing = false // Скрываем индикатор обновления
                             cityText.text = "${getString(R.string.city_prefix)} $cityName" //Город
 
                             recommendationText.text = getRecommendation(tempC, condition, precipMm, windKph)
 
-                            // Загрузите изображение погоды
-                            val iconUrl = "https:${weatherIconUrl}"
-                            Glide.with(this@MainActivity)
-                                .load(iconUrl)
-                                .into(weatherImage)
+                            // Проверяем, не уничтожена ли Activity, перед загрузкой изображения
+                            if (!isDestroyed) {
+                                val iconUrl = "https:${weatherIconUrl}"
+                                Glide.with(this@MainActivity)
+                                    .load(iconUrl)
+                                    .into(weatherImage)
 
+                            }
                             // Установите текст статуса погоды
                             findViewById<TextView>(R.id.weatherStatus).text = getWeatherStatus(condition)
 
@@ -561,7 +563,58 @@ class MainActivity : AppCompatActivity() {
                             // Устанавливаем значения иконок и текстов
                             findViewById<TextView>(R.id.tempValue).text = "$tempC °C"
                             findViewById<TextView>(R.id.precipValue).text = "$humidity %"
-                            findViewById<TextView>(R.id.windValue).text = "$windKph км/ч"
+
+
+                            val windKph = current.getDouble("wind_kph")
+                            val windMps = windKph / 3.6 // Преобразование км/ч в м/с
+                            findViewById<TextView>(R.id.windValue).text = "%.1f м/с".format(windMps)
+
+                            val windDirection = current.getString("wind_dir") // Получаем направление ветра, например, "N", "NE", "E", и т.д.
+                            Log.d("WindDirection", "Wind direction: $windDirection")
+
+                            val windDirectionImageView = findViewById<ImageView>(R.id.iconWind)
+                            val windDirectionTextView = findViewById<TextView>(R.id.windDirectionText)
+
+                        // Устанавливаем изображение и текст в зависимости от направления, откуда дует ветер
+                            when (windDirection) {
+                                "N" -> {
+                                    windDirectionImageView.setImageResource(R.drawable.s) // Стрелка указывает на север
+                                    windDirectionTextView.text = "С" //Серер
+                                }
+                                "NE" -> {
+                                    windDirectionImageView.setImageResource(R.drawable.ws) // Стрелка указывает на северо-восток
+                                    windDirectionTextView.text = "СВ"
+                                }
+                                "E" -> {
+                                    windDirectionImageView.setImageResource(R.drawable.w) // Стрелка указывает на восток
+                                    windDirectionTextView.text = "В"
+                                }
+                                "SE" -> {
+                                    windDirectionImageView.setImageResource(R.drawable.nw) // Стрелка указывает на юго-восток
+                                    windDirectionTextView.text = "ЮВ"
+                                }
+                                "S" -> {
+                                    windDirectionImageView.setImageResource(R.drawable.n) // Стрелка указывает на юг
+                                    windDirectionTextView.text = "Ю" //юг
+                                }
+                                "SW" -> {
+                                    windDirectionImageView.setImageResource(R.drawable.sww) // Стрелка указывает на юго-запад
+                                    windDirectionTextView.text = "ЮЗ"
+                                }
+                                "W" -> {
+                                    windDirectionImageView.setImageResource(R.drawable.e) // Стрелка указывает на запад
+                                    windDirectionTextView.text = "З"
+                                }
+                                "NW" -> {
+                                    windDirectionImageView.setImageResource(R.drawable.nw) // Стрелка указывает на северо-запад
+                                    windDirectionTextView.text = "СЗ"
+                                }
+                                else -> {
+                                    windDirectionImageView.setImageResource(R.drawable.icon_wind) // Используем изображение по умолчанию для неизвестного направления
+                                    windDirectionTextView.text = "?"
+                                }
+                            }
+
 
                             findViewById<TextView>(R.id.precipMmValue).text= "$precipMm мм"
 

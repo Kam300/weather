@@ -40,12 +40,10 @@ class InformationActivity : AppCompatActivity() {
     private val currentVersion = "1.0.8"
     private val REQUEST_CODE_STORAGE = 1001 // Код запроса для разрешений
 
-
-
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         // Проверка сохраненной темы
-        setThemeAccordingToPreference()
+        setThemeAccordingToPreference() // Устанавливаем тему перед вызовом super.onCreate()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.information)
 
