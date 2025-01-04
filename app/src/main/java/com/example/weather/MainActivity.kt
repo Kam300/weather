@@ -40,6 +40,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.weather.databinding.ActivityMainBinding
 import com.google.gson.Gson
@@ -50,8 +52,12 @@ import com.yandex.mobile.ads.common.AdRequest
 import com.yandex.mobile.ads.common.AdRequestError
 import com.yandex.mobile.ads.common.ImpressionData
 import com.yandex.mobile.ads.common.MobileAds
+import org.json.JSONArray
 import java.io.File
 import java.io.IOException
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.roundToInt
 
@@ -83,9 +89,9 @@ class MainActivity : AppCompatActivity() {
             }
             val adWidth = (adWidthPixels / resources.displayMetrics.density).roundToInt()
 
-            // Возвращаем "липкий" размер для отображения рекламы внизу экрана
             return BannerAdSize.stickySize(this, adWidth)
         }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setLocale(getSavedLanguage()) // Set the language before super
@@ -182,7 +188,7 @@ class MainActivity : AppCompatActivity() {
     private fun loadBannerAd(adSize: BannerAdSize): BannerAdView {
         return binding.banner.apply {
             setAdSize(adSize)
-            setAdUnitId("demo-banner-yandex")
+            setAdUnitId("R-M-13560612-1")
             setBannerAdEventListener(object : BannerAdEventListener {
                 override fun onAdLoaded() {
                     // Проверка на destroyed перед использованием
@@ -239,7 +245,7 @@ class MainActivity : AppCompatActivity() {
                             if (updateInfo.version != currentVersion) {
                                 showUpdateDialog(updateInfo.url)
                             } else {
-                                Toast.makeText(this@MainActivity, getString(R.string.no_update_available), Toast.LENGTH_SHORT).show()  //Вы используете последнюю версию.
+                                println("последняя версия приложения")
                             }
                         }
                     }
@@ -500,24 +506,22 @@ class MainActivity : AppCompatActivity() {
 
     private fun fetchWeatherData(location: String) {
         progressBar.visibility = View.VISIBLE
-        swipeRefreshLayout.isRefreshing = true  // Показать индикатор обновления
+        swipeRefreshLayout.isRefreshing = true // Показать индикатор обновления
+
         thread {
             val client = OkHttpClient()
             val apiKey = "8781514e8a924488b99124630242610"
             val request = Request.Builder()
-                .url("https://api.weatherapi.com/v1/forecast.json?key=$apiKey&q=$location&days=1")
+                .url("https://api.weatherapi.com/v1/forecast.json?key=$apiKey&q=$location&days=2")
                 .build()
-
 
             client.newCall(request).execute().use { response: Response ->
                 if (response.isSuccessful) {
                     val jsonData = response.body?.string()
                     jsonData?.let {
-
-
                         val jsonObject = JSONObject(it)
                         val forecast = jsonObject.getJSONObject("forecast")
-                        val forecastDay = forecast.getJSONArray("forecastday").getJSONObject(0) // Берем первый день
+                        val forecastDay = forecast.getJSONArray("forecastday").getJSONObject(0)
 
                         val locationObject = jsonObject.getJSONObject("location")
                         val current = jsonObject.getJSONObject("current")
@@ -526,56 +530,52 @@ class MainActivity : AppCompatActivity() {
                         val tempC = current.getDouble("temp_c")
                         val condition = current.getJSONObject("condition").getString("text")
                         val precipMm = current.getDouble("precip_mm")
-                        val humidity = current.getDouble("humidity") // Получаем влажность
+                        val humidity = current.getDouble("humidity")
                         val windKph = current.getDouble("wind_kph")
                         val weatherIconUrl = current.getJSONObject("condition").getString("icon")
                         val lastUpdated = current.getString("last_updated")
-                        // Check if min and max temperature values exist
                         val minTempC = forecastDay.getJSONObject("day").getDouble("mintemp_c")
                         val maxTempC = forecastDay.getJSONObject("day").getDouble("maxtemp_c")
-
                         val feelslikeС = current.getString("feelslike_c")
 
+                        val forecastDays = forecast.getJSONArray("forecastday")
+                        // Получаем данные на следующие 24 часа
+                        val hourlyWeatherList = getHourlyWeatherForNext24Hours(forecastDays)
 
                         currentCityName = cityName
                         saveCurrentCity(cityName)
+
                         runOnUiThread {
                             progressBar.visibility = View.GONE
-                            swipeRefreshLayout.isRefreshing = false // Скрываем индикатор обновления
-                            cityText.text = "${getString(R.string.city_prefix)} $cityName" //Город
+                            swipeRefreshLayout.isRefreshing = false
 
+                            cityText.text = "${getString(R.string.city_prefix)} $cityName"
                             recommendationText.text = getRecommendation(tempC, condition, precipMm, windKph)
 
-                            // Проверяем, не уничтожена ли Activity, перед загрузкой изображения
+                            // Устанавливаем адаптер для RecyclerView
+                            val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
+                            recyclerView.layoutManager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.HORIZONTAL, false)
+                            recyclerView.adapter = HourlyWeatherAdapter(hourlyWeatherList)
+
                             if (!isDestroyed) {
                                 val iconUrl = "https:${weatherIconUrl}"
                                 Glide.with(this@MainActivity)
                                     .load(iconUrl)
                                     .into(weatherImage)
-
                             }
-                            // Установите текст статуса погоды
+
                             findViewById<TextView>(R.id.weatherStatus).text = getWeatherStatus(condition)
-
-
-
-
-                            // Устанавливаем значения иконок и текстов
                             findViewById<TextView>(R.id.tempValue).text = "$tempC °C"
                             findViewById<TextView>(R.id.precipValue).text = "$humidity %"
 
-
-                            val windKph = current.getDouble("wind_kph")
-                            val windMps = windKph / 3.6 // Преобразование км/ч в м/с
+                            val windMps = windKph / 3.6
                             findViewById<TextView>(R.id.windValue).text = "%.1f м/с".format(windMps)
 
-                            val windDirection = current.getString("wind_dir") // Получаем направление ветра, например, "N", "NE", "E", и т.д.
-                            Log.d("WindDirection", "Wind direction: $windDirection")
-
+                            val windDirection = current.getString("wind_dir")
                             val windDirectionImageView = findViewById<ImageView>(R.id.iconWind)
                             val windDirectionTextView = findViewById<TextView>(R.id.windDirectionText)
 
-                        // Устанавливаем изображение и текст в зависимости от направления, откуда дует ветер
+  // Устанавливаем изображение и текст в зависимости от направления, откуда дует ветер
                             when (windDirection) {
                                 "N" -> {
                                     windDirectionImageView.setImageResource(R.drawable.s) // Стрелка указывает на север
@@ -583,31 +583,31 @@ class MainActivity : AppCompatActivity() {
                                 }
                                 "NE" -> {
                                     windDirectionImageView.setImageResource(R.drawable.ws) // Стрелка указывает на северо-восток
-                                    windDirectionTextView.text = "СВ"
+                                    windDirectionTextView.text = "СВ" // отвечает на вопрос какой ветер и откуда
                                 }
                                 "E" -> {
                                     windDirectionImageView.setImageResource(R.drawable.w) // Стрелка указывает на восток
-                                    windDirectionTextView.text = "В"
+                                    windDirectionTextView.text = "В" // отвечает на вопрос какой ветер и откуда
                                 }
                                 "SE" -> {
                                     windDirectionImageView.setImageResource(R.drawable.nw) // Стрелка указывает на юго-восток
-                                    windDirectionTextView.text = "ЮВ"
+                                    windDirectionTextView.text = "ЮВ" // отвечает на вопрос какой ветер и откуда
                                 }
                                 "S" -> {
                                     windDirectionImageView.setImageResource(R.drawable.n) // Стрелка указывает на юг
-                                    windDirectionTextView.text = "Ю" //юг
+                                    windDirectionTextView.text = "Ю" // отвечает на вопрос какой ветер и откуда
                                 }
                                 "SW" -> {
                                     windDirectionImageView.setImageResource(R.drawable.sww) // Стрелка указывает на юго-запад
-                                    windDirectionTextView.text = "ЮЗ"
+                                    windDirectionTextView.text = "ЮЗ" // отвечает на вопрос какой ветер и откуда
                                 }
                                 "W" -> {
                                     windDirectionImageView.setImageResource(R.drawable.e) // Стрелка указывает на запад
-                                    windDirectionTextView.text = "З"
+                                    windDirectionTextView.text = "З" // отвечает на вопрос какой ветер и откуда
                                 }
                                 "NW" -> {
                                     windDirectionImageView.setImageResource(R.drawable.nw) // Стрелка указывает на северо-запад
-                                    windDirectionTextView.text = "СЗ"
+                                    windDirectionTextView.text = "СЗ" // отвечает на вопрос какой ветер и откуда
                                 }
                                 else -> {
                                     windDirectionImageView.setImageResource(R.drawable.icon_wind) // Используем изображение по умолчанию для неизвестного направления
@@ -644,6 +644,40 @@ class MainActivity : AppCompatActivity() {
 
 
 
+    }
+
+    fun getHourlyWeatherForNext24Hours(forecastDays: JSONArray): List<HourlyWeather> {
+        val currentDateTime = LocalDateTime.now(ZoneId.systemDefault())
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+        val hourlyWeatherList = mutableListOf<HourlyWeather>()
+
+        // Проходим по всем доступным дням прогноза
+        for (dayIndex in 0 until forecastDays.length()) {
+            val dayData = forecastDays.getJSONObject(dayIndex)
+            val hourlyForecast = dayData.getJSONArray("hour")
+
+            for (i in 0 until hourlyForecast.length()) {
+                val hourData = hourlyForecast.getJSONObject(i)
+                val time = hourData.getString("time")
+                val hourTempC = hourData.getDouble("temp_c")
+                val hourIconUrl = hourData.getJSONObject("condition").getString("icon")
+
+                // Преобразуем строку времени в LocalDateTime
+                val forecastTime = LocalDateTime.parse(time, formatter)
+
+                // Добавляем данные, если они находятся в пределах следующих 24 часов
+                if (forecastTime.isAfter(currentDateTime) || forecastTime.isEqual(currentDateTime)) {
+                    hourlyWeatherList.add(HourlyWeather(time, hourTempC, hourIconUrl))
+                }
+
+                // Останавливаем, если собрали 24 часа
+                if (hourlyWeatherList.size == 24) {
+                    return hourlyWeatherList
+                }
+            }
+        }
+
+        return hourlyWeatherList
     }
 
     private fun getCurrentSeason(): String {
@@ -844,3 +878,8 @@ class MainActivity : AppCompatActivity() {
 
 
 }
+data class HourlyWeather(
+    val time: String,
+    val temperature: Double,
+    val iconUrl: String
+)

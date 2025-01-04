@@ -125,6 +125,6 @@
         <string name="restart">Restart</string>
         <string name="cancel">Cancel</string>
         <!-- Other strings as needed... -->
-
+<string name="ad">Advertising</string>
 
 </resources>

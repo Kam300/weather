@@ -8,7 +8,9 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        app:cardBackgroundColor="?attr/colorSurface">
+
 
         <ScrollView
             android:id="@+id/scrollView"
@@ -112,10 +114,26 @@
                             android:textColor="?android:attr/textColorPrimary"
                             android:layout_marginBottom="16dp" />
 
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/recyclerView"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:layout_marginBottom="16dp"/>
+                        </LinearLayout>
+
                         <HorizontalScrollView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fillViewport="true">
+
+
+
                             <LinearLayout
                                 android:background="@drawable/color_round"
                                 android:layout_width="match_parent"
@@ -266,7 +284,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center"
                                 android:layout_marginStart="8dp"
-                                android:text="Ощущается как:"
+                                android:text="@string/it_feels_like"
                                 android:textColor="?android:attr/textColorPrimary"
                                 android:textSize="18sp" />
 
@@ -303,10 +321,15 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
         </ScrollView>
 
+
         <com.yandex.mobile.ads.banner.BannerAdView
             android:id="@+id/banner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true" />
+            android:layout_alignParentBottom="true"
+            android:text="@string/weather_status_default"
+            app:cardBackgroundColor="?attr/colorSurface"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
     </RelativeLayout>
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

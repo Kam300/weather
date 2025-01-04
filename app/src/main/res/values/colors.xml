@@ -4,4 +4,8 @@
     <color name="holo_blue_dark">#FF33B5E5</color>
     <color name="button_background">#FF33B5E5</color> <!-- Light theme button background -->
     <color name="color_background">#03FB90</color>
+
+        <color name="background_color">#FFFFFF</color>
+
+    <color name="banner_background">#E0E0E0</color> <!-- Цвет для светлой темы -->
 </resources>

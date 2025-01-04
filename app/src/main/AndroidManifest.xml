@@ -29,9 +29,7 @@
         tools:targetApi="31">
 
         <!-- Метаданные для Яндекс Рекламы -->
-        <meta-data
-            android:name="com.yandex.mobile.ads.APP_ID"
-            android:value="demo-banner-yandex"/>
+
         <meta-data
             android:name="com.yandex.mobile.ads.AUTOMATIC_SDK_INITIALIZATION"
             android:value="false" />

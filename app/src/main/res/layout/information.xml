@@ -4,9 +4,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:padding="16dp"
     android:background="@drawable/background_gradient">
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:scrollbars="none"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/background_gradient"
+        android:layout_above="@id/banner1"
+        android:fillViewport="true"> <!-- Убедитесь, что ScrollView заполняет доступное пространство -->
 
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp"
+        android:background="@drawable/background_gradient">
     <Button
         android:id="@+id/beforeButton"
         android:layout_width="wrap_content"
@@ -70,7 +82,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:background="@drawable/rounded_button"
-        android:text="@string/about_check_updates"
+        android:text="Политика"
         android:textColor="?android:attr/textColorPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -116,5 +128,13 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/themeSettingsButton" />
 
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+    <com.yandex.mobile.ads.banner.BannerAdView
+
+        android:id="@+id/banner1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

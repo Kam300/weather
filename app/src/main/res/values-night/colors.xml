@@ -1,7 +1,9 @@
 <resources>
     <color name="black">#FFFFFFFF</color>
     <color name="white">#2E2B2B</color>
-    <color name="holo_blue_dark">#FF6200EE</color>  <!-- Darker shade for dark theme -->
+    <color name="holo_blue_dark">#FF6200EE</color> <!-- Darker shade for dark theme -->
     <color name="button_background">#FF3700B3</color> <!-- Dark theme button background -->
     <color name="color_background">#083E29</color>
+    <color name="background_color">#000000</color>
+    <color name="banner_background">#303030</color>
 </resources>
