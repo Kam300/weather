@@ -133,4 +133,5 @@
     <string name="date">Дата</string>
     <string name="max">Макс</string>
     <string name="min">Мин</string>
+    <string name="error_message_no_internet">Отсуствует интернет</string>
 </resources>

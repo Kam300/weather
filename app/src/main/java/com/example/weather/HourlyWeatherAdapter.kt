@@ -1,4 +1,4 @@
-package com.example.weather
+package com.example.weathertyre
 
 import android.view.LayoutInflater
 import android.view.View
@@ -7,6 +7,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+
 
 class HourlyWeatherAdapter(private val hourlyData: List<HourlyWeather>) :
     RecyclerView.Adapter<HourlyWeatherAdapter.HourViewHolder>() {

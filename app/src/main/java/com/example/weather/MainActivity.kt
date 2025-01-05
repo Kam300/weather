@@ -1,4 +1,4 @@
-package com.example.weather
+package com.example.weathertyre
 
 import android.Manifest
 import android.app.DownloadManager
@@ -7,6 +7,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.location.Location
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -43,7 +45,9 @@ import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.example.weather.databinding.ActivityMainBinding
+import com.example.weathertyre.databinding.ActivityMainBinding
+
+
 import com.google.gson.Gson
 import com.yandex.mobile.ads.banner.BannerAdEventListener
 import com.yandex.mobile.ads.banner.BannerAdSize
@@ -62,7 +66,7 @@ import java.util.Locale
 import kotlin.math.roundToInt
 
 private lateinit var fusedLocationClient: FusedLocationProviderClient
-private val currentVersion = "1.0.8"
+private val currentVersion = "1.1.0"
 
 class MainActivity : AppCompatActivity() {
     private lateinit var cityText: TextView
@@ -137,15 +141,21 @@ class MainActivity : AppCompatActivity() {
 // Инициализация SwipeRefreshLayout
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
         swipeRefreshLayout.setOnRefreshListener {
-            val currentCity = cityText.text.toString().removePrefix(getString(R.string.city_prefix)).trim()
-            if (currentCity.isNotEmpty()) {
-                fetchWeatherData(currentCity)
-            } else {
-                showError(getString(R.string.no_city_selected)) // Пожалуйста, выберите город.
+            if (!isInternetAvailable()) {
+                // Сначала проверяем наличие интернета
+                showError(getString(R.string.error_message_no_internet)) // Отображаем сообщение об отсутствии интернета
                 swipeRefreshLayout.isRefreshing = false
+            } else {
+                // Если интернет доступен, проверяем, указан ли город
+                val currentCity = cityText.text.toString().removePrefix(getString(R.string.city_prefix)).trim()
+                if (!currentCity.isNotEmpty()) {
+                    // Если город указан, обновляем данные о местоположении и погоде
+                    getCurrentLocation()
+                } else {
+                    getCurrentLocation()
+                }
             }
         }
-
         // Проверка сохраненной темы
         setThemeAccordingToPreference()
 
@@ -326,19 +336,30 @@ class MainActivity : AppCompatActivity() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             // Если разрешение предоставлено, получаем местоположение
             fusedLocationClient.lastLocation.addOnSuccessListener(this) { location: Location? ->
-                location?.let {
-                    fetchWeatherData("${it.latitude},${it.longitude}")
-                } ?: run {
+                if (location != null) {
+                    // Если местоположение получено, используем его
+                    fetchWeatherData("${location.latitude},${location.longitude}")
+                } else {
+                    // Если местоположение недоступно, используем IP для определения местоположения
                     getWeatherByIP()
-
                 }
+            }.addOnFailureListener {
+                // В случае ошибки при получении местоположения, также используем IP
+                getWeatherByIP()
             }
         } else {
             // Если разрешение не предоставлено, запрашиваем его
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1)
         }
     }
+
     private fun getWeatherByIP() {
+        if (!isInternetAvailable()) {
+            // Проверяем наличие интернета перед выполнением сетевого запроса
+            showError(getString(R.string.error_message_no_internet)) // Отображаем сообщение об отсутствии интернета
+            return
+        }
+
         thread {
             try {
                 val client = OkHttpClient()
@@ -361,23 +382,25 @@ class MainActivity : AppCompatActivity() {
                         }
                     } else {
                         runOnUiThread {
-                            println("Ошибка: Не удалось определить местоположение по IP.")
-                            showError("Не удалось определить местоположение по IP.")
+                            showError(getString(R.string.error_message_fetch_data)) // Ошибка загрузки данных
+                            println("Не удалось определить местоположение по IP.")
                         }
                     }
                 }
             } catch (e: Exception) {
                 runOnUiThread {
+                    showError(getString(R.string.error_message_fetch_data)) // Ошибка загрузки данных
                     println("Ошибка при получении местоположения по IP: ${e.message}")
-                    showError("Ошибка при получении местоположения по IP: ${e.message}")
                 }
             }
         }
     }
 
-
-
     private fun fetchWeatherData(location: String) {
+        if (!isInternetAvailable()) {
+            showError(getString(R.string.error_message_no_internet)) // Отображаем сообщение об отсутствии интернета
+            return
+        }
         progressBar.visibility = View.VISIBLE
         swipeRefreshLayout.isRefreshing = true // Показать индикатор обновления
 
@@ -624,7 +647,13 @@ class MainActivity : AppCompatActivity() {
             else -> "unknown"
         }
     }
-
+    // Добавьте функцию для проверки наличия подключения к интернету
+    private fun isInternetAvailable(): Boolean {
+        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork = connectivityManager.activeNetwork
+        val networkCapabilities = connectivityManager.getNetworkCapabilities(activeNetwork)
+        return networkCapabilities != null && networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
 
     private fun getWeatherStatus(condition: String): String {
         val conditionLower = condition.toLowerCase()

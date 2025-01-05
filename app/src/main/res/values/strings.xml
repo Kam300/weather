@@ -7,6 +7,7 @@
     <string name="downloading_update">Downloading new version...</string>
     <string name="now_downloading_update">The download has started...</string>
     <string name="no_update_available">You are using the latest version.</string>
+    <string name="error_message_no_internet">There is no Internet</string>
 
     <string name="update_available">Update available</string>
     <string name="update_dialog_message">A new version is available. Would you like to download it?</string>

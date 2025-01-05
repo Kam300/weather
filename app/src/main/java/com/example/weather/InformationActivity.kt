@@ -1,4 +1,4 @@
-package com.example.weather
+package com.example.weathertyre
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -33,8 +33,7 @@ import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.FileProvider
-import com.example.weather.databinding.ActivityMainBinding
-import com.example.weather.databinding.InformationBinding
+
 import com.yandex.mobile.ads.banner.BannerAdEventListener
 import com.yandex.mobile.ads.banner.BannerAdSize
 import com.yandex.mobile.ads.banner.BannerAdView
@@ -49,7 +48,7 @@ import kotlin.math.roundToInt
 data class UpdateInfo(val version: String, val url: String)
 
 class InformationActivity : AppCompatActivity() {
-    private val currentVersion = "1.0.8"
+    private val currentVersion = "1.1.0"
     private val REQUEST_CODE_STORAGE = 1001 // Код запроса для разрешений
     @SuppressLint("MissingInflatedId")
 
@@ -68,7 +67,7 @@ class InformationActivity : AppCompatActivity() {
 //        requestStoragePermissions()
 
         val linkButton: Button = findViewById(R.id.linkButton)
-        val linkButton2: Button = findViewById(R.id.linkButton22)
+//        val linkButton2: Button = findViewById(R.id.linkButton22)
         val checkUpdateButton: Button = findViewById(R.id.checkUpdateButton)
         val beforeButton: Button = findViewById(R.id.beforeButton)
         val themeSettingsButton: Button = findViewById(R.id.themeSettingsButton )
@@ -84,12 +83,12 @@ class InformationActivity : AppCompatActivity() {
 
 
 
-
-        linkButton2.setOnClickListener {
-            val url = "http://comgamedev.gilect.net/?i=1"
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            startActivity(intent)
-        }
+//
+//        linkButton2.setOnClickListener {
+//            val url = "http://comgamedev.gilect.net/?i=1"
+//            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+//            startActivity(intent)
+//        }
 
         linkButton.setOnClickListener {
             val url2 = "https://t.me/ComGameDev"

@@ -9,15 +9,15 @@ android {
     viewBinding {
         enable = true // Исправьте строку 10 таким образом, чтобы использовать assignment, а не comparison
     }
-    namespace = "com.example.weather"
+    namespace = "com.example.weathertyre"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.weather"
+        applicationId = "com.example.weathertyre"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0.8"
+        versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -50,6 +50,7 @@ android {
 
 dependencies {
     implementation ("com.yandex.android:mobileads:7.8.1")
+
 
     implementation(libs.androidx.core.ktx) // Up-to-date version
     implementation(libs.okhttp) // Ensure this points to the correct version
