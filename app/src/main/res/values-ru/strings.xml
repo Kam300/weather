@@ -8,7 +8,7 @@
     <string name="now_downloading_update">Скачивание началось...</string>
     <string name="no_update_available">Вы используете последнюю версию.</string>
 
-    <string name="update_available">Доступно обновление</string>
+    <string name="update_available">Доступно обновление в rustore</string>
     <string name="update_dialog_message">Доступна новая версия. Хотели бы вы ее скачать?</string>
     <string name="no_city_selected">Пожалуйста, выберите город.</string>
     <string name="city_prefix">Город: </string>
@@ -99,6 +99,7 @@
         <string name="weather_light_snow_showers">Небольшой снежный дождь</string>
         <string name="weather_sunny">Cолнечно</string>
         <string name="weather_freezing_fog">Ледяной туман</string>
+        <string name="weather_blowing_snow">Снежная метель</string>
 
     <!-- About Screen Texts -->
     <string name="about_title">О приложении</string>
@@ -122,7 +123,14 @@
     <string name="restart_app_message">Чтобы применить новый язык, приложение необходимо перезапустить. Хотите перезапустить сейчас?</string>
     <string name="restart">Перезапуск</string>
     <string name="cancel">Cancel</string>
-
+    <string name="select_politic">Политика</string>
     <string name="it_feels_like">Ощущается как:</string>
     <string name="ad">Реклама</string>
+    <string name="text3">"Погода на 3 дня"</string>
+    <string name="today">Сегодня</string>
+    <string name="tomorrow">Завтра</string>
+    <string name="day_after_tomorrow">Послезавтра</string>
+    <string name="date">Дата</string>
+    <string name="max">Макс</string>
+    <string name="min">Мин</string>
 </resources>

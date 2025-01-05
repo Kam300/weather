@@ -83,6 +83,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
+                        android:scrollbars="none"
                         android:padding="16dp">
 
                         <TextView
@@ -115,7 +116,7 @@
                             android:layout_marginBottom="16dp" />
 
                         <LinearLayout
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal">
 
@@ -123,14 +124,18 @@
                                 android:id="@+id/recyclerView"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:layout_marginBottom="16dp"/>
+                                android:orientation="vertical"
+                                android:layout_marginBottom="16dp"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintHorizontal_bias="0.0"
+                                app:layout_constraintStart_toStartOf="parent"/>
                         </LinearLayout>
 
                         <HorizontalScrollView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:fillViewport="true">
+                            android:fillViewport="true"
+                            android:scrollbars="none">
 
 
 
@@ -204,13 +209,14 @@
                         <HorizontalScrollView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:fillViewport="true">
+                            android:fillViewport="true"
+                            android:scrollbars="none">
                             <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="45dp"
                                 android:layout_marginBottom="16dp"
                                 android:background="@drawable/color_round"
-                                android:gravity="center"
+                                android:gravity="fill"
                                 android:orientation="horizontal">
 
                                 <ImageView
@@ -298,6 +304,31 @@
                                 android:textColor="?android:attr/textColorPrimary"
                                 android:textSize="18sp" />
                         </LinearLayout>
+                        <TextView
+                            android:layout_gravity="center"
+                            android:id="@+id/weather5"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="@string/text3"
+                            android:textSize="24sp"
+                            android:textColor="?android:attr/textColorPrimary"
+                            android:layout_marginBottom="16dp" />
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/recyclerView1"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:layout_marginBottom="16dp"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintHorizontal_bias="0.0"
+                                app:layout_constraintStart_toStartOf="parent"/>
+                        </LinearLayout>
 
                         <TextView
                             android:id="@+id/lastUpdatedText"
@@ -316,7 +347,9 @@
                             android:layout_height="wrap_content"
                             android:visibility="gone"
                             android:layout_gravity="center" />
+
                     </LinearLayout>
+
                 </androidx.cardview.widget.CardView>
             </androidx.constraintlayout.widget.ConstraintLayout>
         </ScrollView>

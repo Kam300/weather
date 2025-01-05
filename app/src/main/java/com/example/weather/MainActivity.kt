@@ -179,8 +179,6 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        checkForUpdates()
-
         // Попытка получить текущее местоположение
         getCurrentLocation()
     }
@@ -230,161 +228,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun checkForUpdates() {
-        val url = "https://raw.githubusercontent.com/Kam300/URL/refs/heads/main/versionweapson.json"
-        val client = OkHttpClient()
-        val request = Request.Builder().url(url).build()
-
-        client.newCall(request).enqueue(object : okhttp3.Callback {
-            override fun onResponse(call: okhttp3.Call, response: Response) {
-                if (response.isSuccessful) {
-                    response.body?.string()?.let { jsonResponse ->
-                        val updateInfo = Gson().fromJson(jsonResponse, UpdateInfo::class.java)
-
-                        runOnUiThread {
-                            if (updateInfo.version != currentVersion) {
-                                showUpdateDialog(updateInfo.url)
-                            } else {
-                                println("последняя версия приложения")
-                            }
-                        }
-                    }
-                } else {
-                    runOnUiThread {
-                        Toast.makeText(this@MainActivity, getString(R.string.error_message_fetch_data), Toast.LENGTH_SHORT).show() //Не удалось проверить наличие обновлений
-                    }
-                }
-            }
-
-            override fun onFailure(call: okhttp3.Call, e: IOException) {
-                runOnUiThread {
-                    Toast.makeText(this@MainActivity, getString(R.string.error_message_location_permission), Toast.LENGTH_SHORT).show() //Ошибка сети
-
-                }
-            }
-        })
-    }
-
-    private fun showUpdateDialog(url: String) {
-        // Inflate the custom layout for the dialog
-        val dialogView = layoutInflater.inflate(R.layout.dialog_update, null)
-
-        // Find views in the inflated layout
-        val dialogTitle: TextView = dialogView.findViewById(R.id.dialogTitle)
-        val dialogMessage: TextView = dialogView.findViewById(R.id.dialogMessage)
-        val buttonDownload: Button = dialogView.findViewById(R.id.buttonDownload)
-        val buttonCancel: Button = dialogView.findViewById(R.id.buttonCancel)
-        val downloadProgressBar: ProgressBar = dialogView.findViewById(R.id.downloadProgressBar)
-
-        // Set the title and message (you can customize them further if needed)
-        dialogTitle.text = getString(R.string.update_available) //"Доступно обновление"
-        dialogMessage.text = getString(R.string.update_dialog_message) //"Доступна новая версия. Хотели бы вы ее скачать?
-
-        // Build the dialog
-        val dialog = AlertDialog.Builder(this, R.style.TransparentDialogTheme)
-            .setView(dialogView)
-            .setCancelable(false) // Делаем диалог неотменяемым
-            .create()
-
-        // Set click listener for the download button
-        buttonDownload.setOnClickListener {
-            downloadApk(url, downloadProgressBar) // Передаем ProgressBar в метод загрузки
-            dialog.dismiss() // Дисмисс диалога сразу
-            dialog.show() // Показываем диалог
-        }
-
-        // Set click listener for the cancel button
-        buttonCancel.setOnClickListener {
-            dialog.dismiss() // Just dismiss the dialog
-        }
-
-        dialog.show() // Show the dialog
-    }
-
-    private fun downloadApk(apkUrl: String, progressBar: ProgressBar) {
-        val destinationDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-        val apkFile = File(destinationDir, "yourapp-${currentVersion}.apk")
-
-        // Create the download request
-        val request = DownloadManager.Request(Uri.parse(apkUrl)).apply {
-            setTitle(getString(R.string.notifications))
-            setDescription(getString(R.string.downloading_update))
-            setDestinationUri(Uri.fromFile(apkFile)) // Note: this line works for download manager
-            setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-            allowScanningByMediaScanner() // Allow file scanning
-        }
-
-        val downloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        val downloadId = downloadManager.enqueue(request)
-
-        // Start tracking progress in a separate thread
-        Thread {
-            var downloading = true
-            runOnUiThread {
-                progressBar.visibility = View.VISIBLE // Show ProgressBar at the start
-            }
-
-            while (downloading) {
-                val query = DownloadManager.Query()
-                query.setFilterById(downloadId)
-
-                val cursor = downloadManager.query(query)
-                if (cursor != null && cursor.moveToFirst()) {
-                    val statusIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
-                    val bytesDownloadedIndex = cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)
-                    val bytesTotalIndex = cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)
-
-                    if (statusIndex != -1 && bytesDownloadedIndex != -1 && bytesTotalIndex != -1) {
-                        val status = cursor.getInt(statusIndex)
-                        val bytesDownloaded = cursor.getInt(bytesDownloadedIndex)
-                        val bytesTotal = cursor.getInt(bytesTotalIndex)
-
-                        when (status) {
-                            DownloadManager.STATUS_RUNNING -> {
-                                val progress = (bytesDownloaded * 100L / bytesTotal).toInt()
-                                runOnUiThread {
-                                    progressBar.progress = progress
-                                }
-                            }
-                            DownloadManager.STATUS_SUCCESSFUL -> {
-                                downloading = false
-                                runOnUiThread {
-                                    progressBar.visibility = View.GONE
-                                    Toast.makeText(this, getString(R.string.complete_download), Toast.LENGTH_SHORT).show()
-
-                                    // Install APK
-
-                                    val uri = FileProvider.getUriForFile(
-                                        this,
-                                        "${BuildConfig.APPLICATION_ID}.fileprovider",
-                                        apkFile
-                                    )
-
-
-
-                                    val intent = Intent(Intent.ACTION_VIEW)
-                                    intent.setDataAndType(uri, "application/vnd.android.package-archive")
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // Grant permission to read URI
-                                    startActivity(intent)
-                                }
-                            }
-                            DownloadManager.STATUS_FAILED -> {
-                                downloading = false
-                                runOnUiThread {
-                                    progressBar.visibility = View.GONE
-                                    Toast.makeText(this, getString(R.string.error_download), Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        }
-                    }
-                    cursor.close()
-                }
-            }
-        }.start()
-
-        Toast.makeText(this, getString(R.string.now_downloading_update), Toast.LENGTH_SHORT).show()
-    }
 
 
     // Function to show settings dialog
@@ -478,15 +321,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
-
-
-
-
-
-
-
-
     private fun getCurrentLocation() {
         // Проверяем разрешение на доступ к местоположению
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -495,7 +329,8 @@ class MainActivity : AppCompatActivity() {
                 location?.let {
                     fetchWeatherData("${it.latitude},${it.longitude}")
                 } ?: run {
-                    showError("Не удалось получить ваше текущее местоположение. Пожалуйста, выберите город.")
+                    getWeatherByIP()
+
                 }
             }
         } else {
@@ -503,6 +338,44 @@ class MainActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1)
         }
     }
+    private fun getWeatherByIP() {
+        thread {
+            try {
+                val client = OkHttpClient()
+                val request = Request.Builder()
+                    .url("https://ipinfo.io/json") // Используем HTTPS
+                    .build()
+
+                client.newCall(request).execute().use { response ->
+                    if (response.isSuccessful) {
+                        val jsonData = response.body?.string()
+                        jsonData?.let {
+                            val jsonObject = JSONObject(it)
+                            val city = jsonObject.getString("city")
+                            println("Определено местоположение: $city")
+
+                            // Используем runOnUiThread для вызова fetchWeatherData(city)
+                            runOnUiThread {
+                                fetchWeatherData(city)
+                            }
+                        }
+                    } else {
+                        runOnUiThread {
+                            println("Ошибка: Не удалось определить местоположение по IP.")
+                            showError("Не удалось определить местоположение по IP.")
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                runOnUiThread {
+                    println("Ошибка при получении местоположения по IP: ${e.message}")
+                    showError("Ошибка при получении местоположения по IP: ${e.message}")
+                }
+            }
+        }
+    }
+
+
 
     private fun fetchWeatherData(location: String) {
         progressBar.visibility = View.VISIBLE
@@ -512,7 +385,7 @@ class MainActivity : AppCompatActivity() {
             val client = OkHttpClient()
             val apiKey = "8781514e8a924488b99124630242610"
             val request = Request.Builder()
-                .url("https://api.weatherapi.com/v1/forecast.json?key=$apiKey&q=$location&days=2")
+                .url("https://api.weatherapi.com/v1/forecast.json?key=$apiKey&q=$location&days=5")
                 .build()
 
             client.newCall(request).execute().use { response: Response ->
@@ -521,6 +394,7 @@ class MainActivity : AppCompatActivity() {
                     jsonData?.let {
                         val jsonObject = JSONObject(it)
                         val forecast = jsonObject.getJSONObject("forecast")
+                        val forecastDays = forecast.getJSONArray("forecastday") // Извлечение массива forecastday
                         val forecastDay = forecast.getJSONArray("forecastday").getJSONObject(0)
 
                         val locationObject = jsonObject.getJSONObject("location")
@@ -537,13 +411,30 @@ class MainActivity : AppCompatActivity() {
                         val minTempC = forecastDay.getJSONObject("day").getDouble("mintemp_c")
                         val maxTempC = forecastDay.getJSONObject("day").getDouble("maxtemp_c")
                         val feelslikeС = current.getString("feelslike_c")
+                        val pressureMb = current.getDouble("pressure_mb") // Добавлено давление
+                        // Создаем список для 5-дневного прогноза
+                        val dailyForecasts = mutableListOf<DailyForecast>()
+                        for (i in 0 until forecastDays.length()) { // Убедитесь, что цикл проходит по всем дням
+                            val day = forecastDays.getJSONObject(i)
+                            val date = day.getString("date")
+                            val dayInfo = day.getJSONObject("day")
+                            val maxTemp = dayInfo.getDouble("maxtemp_c")
+                            val minTemp = dayInfo.getDouble("mintemp_c")
+                            val conditionText = dayInfo.getJSONObject("condition").getString("text")
+                            val conditionIcon = dayInfo.getJSONObject("condition").getString("icon")
 
-                        val forecastDays = forecast.getJSONArray("forecastday")
+                            dailyForecasts.add(DailyForecast(date, maxTemp, minTemp, conditionText, conditionIcon))
+                        }
+
+
                         // Получаем данные на следующие 24 часа
                         val hourlyWeatherList = getHourlyWeatherForNext24Hours(forecastDays)
 
                         currentCityName = cityName
                         saveCurrentCity(cityName)
+
+
+
 
                         runOnUiThread {
                             progressBar.visibility = View.GONE
@@ -552,10 +443,16 @@ class MainActivity : AppCompatActivity() {
                             cityText.text = "${getString(R.string.city_prefix)} $cityName"
                             recommendationText.text = getRecommendation(tempC, condition, precipMm, windKph)
 
+
+
                             // Устанавливаем адаптер для RecyclerView
                             val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
                             recyclerView.layoutManager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.HORIZONTAL, false)
                             recyclerView.adapter = HourlyWeatherAdapter(hourlyWeatherList)
+
+                            val recyclerView1 = findViewById<RecyclerView>(R.id.recyclerView1)
+                            recyclerView1.layoutManager = LinearLayoutManager(this)
+                            recyclerView1.adapter = DailyForecastAdapter(dailyForecasts)
 
                             if (!isDestroyed) {
                                 val iconUrl = "https:${weatherIconUrl}"
@@ -572,48 +469,7 @@ class MainActivity : AppCompatActivity() {
                             findViewById<TextView>(R.id.windValue).text = "%.1f м/с".format(windMps)
 
                             val windDirection = current.getString("wind_dir")
-                            val windDirectionImageView = findViewById<ImageView>(R.id.iconWind)
-                            val windDirectionTextView = findViewById<TextView>(R.id.windDirectionText)
-
-  // Устанавливаем изображение и текст в зависимости от направления, откуда дует ветер
-                            when (windDirection) {
-                                "N" -> {
-                                    windDirectionImageView.setImageResource(R.drawable.s) // Стрелка указывает на север
-                                    windDirectionTextView.text = "С" //Серер
-                                }
-                                "NE" -> {
-                                    windDirectionImageView.setImageResource(R.drawable.ws) // Стрелка указывает на северо-восток
-                                    windDirectionTextView.text = "СВ" // отвечает на вопрос какой ветер и откуда
-                                }
-                                "E" -> {
-                                    windDirectionImageView.setImageResource(R.drawable.w) // Стрелка указывает на восток
-                                    windDirectionTextView.text = "В" // отвечает на вопрос какой ветер и откуда
-                                }
-                                "SE" -> {
-                                    windDirectionImageView.setImageResource(R.drawable.nw) // Стрелка указывает на юго-восток
-                                    windDirectionTextView.text = "ЮВ" // отвечает на вопрос какой ветер и откуда
-                                }
-                                "S" -> {
-                                    windDirectionImageView.setImageResource(R.drawable.n) // Стрелка указывает на юг
-                                    windDirectionTextView.text = "Ю" // отвечает на вопрос какой ветер и откуда
-                                }
-                                "SW" -> {
-                                    windDirectionImageView.setImageResource(R.drawable.sww) // Стрелка указывает на юго-запад
-                                    windDirectionTextView.text = "ЮЗ" // отвечает на вопрос какой ветер и откуда
-                                }
-                                "W" -> {
-                                    windDirectionImageView.setImageResource(R.drawable.e) // Стрелка указывает на запад
-                                    windDirectionTextView.text = "З" // отвечает на вопрос какой ветер и откуда
-                                }
-                                "NW" -> {
-                                    windDirectionImageView.setImageResource(R.drawable.nw) // Стрелка указывает на северо-запад
-                                    windDirectionTextView.text = "СЗ" // отвечает на вопрос какой ветер и откуда
-                                }
-                                else -> {
-                                    windDirectionImageView.setImageResource(R.drawable.icon_wind) // Используем изображение по умолчанию для неизвестного направления
-                                    windDirectionTextView.text = "?"
-                                }
-                            }
+                            setWindDirection(windDirection)
 
 
                             findViewById<TextView>(R.id.precipMmValue).text= "$precipMm мм"
@@ -644,6 +500,84 @@ class MainActivity : AppCompatActivity() {
 
 
 
+    }
+
+    private fun setWindDirection(windDirection: String) {
+        val windDirectionImageView = findViewById<ImageView>(R.id.iconWind)
+        val windDirectionTextView = findViewById<TextView>(R.id.windDirectionText)
+
+        // Устанавливаем изображение и текст в зависимости от направления, откуда дует ветер
+
+        when (windDirection) {
+            "N" -> {
+                windDirectionImageView.setImageResource(R.drawable.s) // Стрелка указывает на север
+                windDirectionTextView.text = "С" // Север
+            }
+            "NNE" -> {
+                windDirectionImageView.setImageResource(R.drawable.ws) // Стрелка указывает на северо-северо-восток
+                windDirectionTextView.text = "ССВ"
+            }
+            "NE" -> {
+                windDirectionImageView.setImageResource(R.drawable.ws) // Стрелка указывает на северо-восток
+                windDirectionTextView.text = "СВ"
+            }
+            "ENE" -> {
+                windDirectionImageView.setImageResource(R.drawable.ws) // Стрелка указывает на восток-северо-восток
+                windDirectionTextView.text = "ВСВ"
+            }
+            "E" -> {
+                windDirectionImageView.setImageResource(R.drawable.w) // Стрелка указывает на восток
+                windDirectionTextView.text = "В"
+            }
+            "ESE" -> {
+                windDirectionImageView.setImageResource(R.drawable.nw) // Стрелка указывает на восток-юго-восток
+                windDirectionTextView.text = "ВЮВ"
+            }
+            "SE" -> {
+                windDirectionImageView.setImageResource(R.drawable.nw) // Стрелка указывает на юго-восток
+                windDirectionTextView.text = "ЮВ"
+            }
+            "SSE" -> {
+                windDirectionImageView.setImageResource(R.drawable.nw) // Стрелка указывает на юг-юго-восток
+                windDirectionTextView.text = "ЮЮВ"
+            }
+            "S" -> {
+                windDirectionImageView.setImageResource(R.drawable.n) // Стрелка указывает на юг
+                windDirectionTextView.text = "Ю"
+            }
+            "SSW" -> {
+                windDirectionImageView.setImageResource(R.drawable.sww) // Стрелка указывает на юг-юго-запад
+                windDirectionTextView.text = "ЮЮЗ"
+            }
+            "SW" -> {
+                windDirectionImageView.setImageResource(R.drawable.sww) // Стрелка указывает на юго-запад
+                windDirectionTextView.text = "ЮЗ"
+            }
+            "WSW" -> {
+                windDirectionImageView.setImageResource(R.drawable.sww) // Стрелка указывает на запад-юго-запад
+                windDirectionTextView.text = "ЗЮЗ"
+            }
+            "W" -> {
+                windDirectionImageView.setImageResource(R.drawable.e) // Стрелка указывает на запад
+                windDirectionTextView.text = "З"
+            }
+            "WNW" -> {
+                windDirectionImageView.setImageResource(R.drawable.nz) // Стрелка указывает на запад-северо-запад
+                windDirectionTextView.text = "ЗСЗ"
+            }
+            "NW" -> {
+                windDirectionImageView.setImageResource(R.drawable.nz) // Стрелка указывает на северо-запад
+                windDirectionTextView.text = "СЗ"
+            }
+            "NNW" -> {
+                windDirectionImageView.setImageResource(R.drawable.nz) // Стрелка указывает на северо-северо-запад
+                windDirectionTextView.text = "ССЗ"
+            }
+            else -> {
+                windDirectionImageView.setImageResource(R.drawable.icon_wind) // Используем изображение по умолчанию для неизвестного направления
+                windDirectionTextView.text = "?"
+            }
+        }
     }
 
     fun getHourlyWeatherForNext24Hours(forecastDays: JSONArray): List<HourlyWeather> {
@@ -727,7 +661,8 @@ class MainActivity : AppCompatActivity() {
             "patchy snow possible" -> getString(R.string.weather_patchy_snow_poss)
             "light snow showers" -> getString(R.string.weather_light_snow_showers)
             "sunny"-> getString(R.string.weather_sunny)
-            "Freezing fog<"-> getString(R.string.weather_freezing_fog)
+            "freezing fog"-> getString(R.string.weather_freezing_fog)
+            "blowing snow" -> getString(R.string.weather_blowing_snow)
             else -> condition // Return the original status if unknown
         }
     }
@@ -882,4 +817,11 @@ data class HourlyWeather(
     val time: String,
     val temperature: Double,
     val iconUrl: String
+)
+data class DailyForecast(
+    val date: String,
+    val maxTemp: Double,
+    val minTemp: Double,
+    val conditionText: String,
+    val conditionIcon: String
 )

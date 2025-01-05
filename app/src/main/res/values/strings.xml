@@ -7,6 +7,7 @@
     <string name="downloading_update">Downloading new version...</string>
     <string name="now_downloading_update">The download has started...</string>
     <string name="no_update_available">You are using the latest version.</string>
+
     <string name="update_available">Update available</string>
     <string name="update_dialog_message">A new version is available. Would you like to download it?</string>
     <string name="no_city_selected">Please select a city.</string>
@@ -38,7 +39,13 @@
     <string name="denied_ermission">Permission to access the storage has been denied.</string>
     <string name="get_your_current_location">Couldn t get your current location. Please select a city.</string>
 
-
+<string name="text3">"Weather for 3 days"</string>
+    <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="day_after_tomorrow">Day After Tomorrow</string>
+    <string name="date">Date</string>
+    <string name="max">Max</string>
+    <string name="min">Min</string>
 
     <!-- City names -->
     <string name="city_current_location">Determine location</string>
@@ -99,6 +106,8 @@
           <string name="weather_light_snow_showers">Light snow showers</string>
           <string name="weather_sunny">Sunny</string>
     <string name="weather_freezing_fog">Freezing fog</string>
+    <string name="weather_blowing_snow">Blowing snow</string>
+    <string name="select_politic">Policy</string>
 
     <!-- About Screen Texts -->
     <string name="about_title">About App</string>
