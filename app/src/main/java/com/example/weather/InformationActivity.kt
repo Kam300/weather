@@ -2,11 +2,12 @@ package com.example.weathertyre
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.DownloadManager
+
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -22,27 +23,15 @@ import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import java.io.File
+
 import java.io.IOException
 import android.provider.Settings
 import android.util.Log
-import android.view.View
-import android.view.ViewTreeObserver
-import android.widget.ProgressBar
-import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.content.FileProvider
 
-import com.yandex.mobile.ads.banner.BannerAdEventListener
-import com.yandex.mobile.ads.banner.BannerAdSize
-import com.yandex.mobile.ads.banner.BannerAdView
-import com.yandex.mobile.ads.common.AdRequest
-import com.yandex.mobile.ads.common.AdRequestError
-import com.yandex.mobile.ads.common.ImpressionData
-import com.yandex.mobile.ads.common.MobileAds
+import androidx.appcompat.app.AppCompatDelegate
+
 import java.util.Locale
-import kotlin.math.roundToInt
+
 
 
 data class UpdateInfo(val version: String, val url: String)
@@ -188,10 +177,27 @@ class InformationActivity : AppCompatActivity() {
 
     private fun isNetworkAvailable(): Boolean {
         val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetworkInfo = connectivityManager.activeNetworkInfo
-        val isConnected = activeNetworkInfo != null && activeNetworkInfo.isConnected
-        Log.d("NetworkCheck", "Network available: $isConnected")
-        return isConnected
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            val network = connectivityManager.activeNetwork
+            val capabilities = connectivityManager.getNetworkCapabilities(network)
+
+            val isConnected = capabilities != null && (
+                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+                    )
+
+            Log.d("NetworkCheck", "Network available: $isConnected")
+            return isConnected
+        } else {
+            // Для старых версий Android (ниже Android 6.0)
+            @Suppress("DEPRECATION")
+            val activeNetworkInfo = connectivityManager.activeNetworkInfo
+            val isConnected = activeNetworkInfo != null && activeNetworkInfo.isConnected
+            Log.d("NetworkCheck", "Network available: $isConnected")
+            return isConnected
+        }
     }
 
 
@@ -209,7 +215,7 @@ class InformationActivity : AppCompatActivity() {
             override fun onResponse(call: okhttp3.Call, response: Response) {
                 Log.d("UpdateCheck", "Response code: ${response.code}")
                 if (response.isSuccessful) {
-                    response.body?.string()?.let { jsonResponse ->
+                    response.body.string().let { jsonResponse ->
                         Log.d("UpdateCheck", "Response body: $jsonResponse")
                         val updateInfo = Gson().fromJson(jsonResponse, UpdateInfo::class.java)
                         Log.d("UpdateCheck", "Update Info: $updateInfo")

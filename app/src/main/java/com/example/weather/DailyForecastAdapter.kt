@@ -1,4 +1,4 @@
-package com.example.weathertyre
+package com.example.weather
 
 import android.view.LayoutInflater
 import android.view.View
@@ -7,6 +7,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.weathertyre.DailyForecast
+import com.example.weathertyre.R
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -39,7 +41,7 @@ class DailyForecastAdapter(private val forecasts: List<DailyForecast>) : Recycle
         val parsedDate = dateFormat.parse(forecast.date)
 
         val displayFormat = SimpleDateFormat("d MMMM", Locale.getDefault())
-        val displayDate = displayFormat.format(parsedDate)
+        val displayDate = parsedDate?.let { displayFormat.format(it) }
 
         // Определение "сегодня", "завтра", "послезавтра"
         val calendar = Calendar.getInstance()
@@ -50,7 +52,9 @@ class DailyForecastAdapter(private val forecasts: List<DailyForecast>) : Recycle
         val dayAfterTomorrow = calendar.clone() as Calendar
 
         val dateCalendar = Calendar.getInstance()
-        dateCalendar.time = parsedDate
+        if (parsedDate != null) {
+            dateCalendar.time = parsedDate
+        }
 
         val context = holder.itemView.context
         val dateText = when {

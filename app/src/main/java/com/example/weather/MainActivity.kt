@@ -1,17 +1,13 @@
 package com.example.weathertyre
 
 import android.Manifest
-import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.res.Configuration
 import android.location.Location
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.util.Log
 import android.view.View
 import android.view.ViewTreeObserver
@@ -38,17 +34,15 @@ import com.bumptech.glide.Glide
 import android.widget.ListView
 import android.widget.ImageButton
 import android.widget.ScrollView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.example.weather.DailyForecastAdapter
 import com.example.weathertyre.databinding.ActivityMainBinding
 
 
-import com.google.gson.Gson
 import com.yandex.mobile.ads.banner.BannerAdEventListener
 import com.yandex.mobile.ads.banner.BannerAdSize
 import com.yandex.mobile.ads.banner.BannerAdView
@@ -57,8 +51,6 @@ import com.yandex.mobile.ads.common.AdRequestError
 import com.yandex.mobile.ads.common.ImpressionData
 import com.yandex.mobile.ads.common.MobileAds
 import org.json.JSONArray
-import java.io.File
-import java.io.IOException
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -129,7 +121,7 @@ class MainActivity : AppCompatActivity() {
 
         val scrollView = findViewById<ScrollView>(R.id.scrollView) // Инициализация ScrollView
 
-        scrollView.setOnScrollChangeListener { _, scrollX, scrollY, oldScrollX, oldScrollY ->
+        scrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
             // Проверяем, что ScrollView в верхней части
             if (scrollY == 0) {
                 swipeRefreshLayout.isEnabled = true // Включаем SwipeRefreshLayout
@@ -207,9 +199,9 @@ class MainActivity : AppCompatActivity() {
                     println("YandexAds загружена")
                 }
 
-                override fun onAdFailedToLoad(adRequestError: AdRequestError) {
+                override fun onAdFailedToLoad(error: AdRequestError) {
                     println("YandexAds ошибка") // Логирование ошибки
-                    Log.e("AdsError", "YandexAds ошибка: ${adRequestError.toString()}")
+                    Log.e("AdsError", "YandexAds ошибка: ${error.toString()}")
                 }
 
                 override fun onAdClicked() {
@@ -369,8 +361,8 @@ class MainActivity : AppCompatActivity() {
 
                 client.newCall(request).execute().use { response ->
                     if (response.isSuccessful) {
-                        val jsonData = response.body?.string()
-                        jsonData?.let {
+                        val jsonData = response.body.string()
+                        jsonData.let {
                             val jsonObject = JSONObject(it)
                             val city = jsonObject.getString("city")
                             println("Определено местоположение: $city")
@@ -413,8 +405,8 @@ class MainActivity : AppCompatActivity() {
 
             client.newCall(request).execute().use { response: Response ->
                 if (response.isSuccessful) {
-                    val jsonData = response.body?.string()
-                    jsonData?.let {
+                    val jsonData = response.body.string()
+                    jsonData.let {
                         val jsonObject = JSONObject(it)
                         val forecast = jsonObject.getJSONObject("forecast")
                         val forecastDays = forecast.getJSONArray("forecastday") // Извлечение массива forecastday
@@ -434,7 +426,7 @@ class MainActivity : AppCompatActivity() {
                         val minTempC = forecastDay.getJSONObject("day").getDouble("mintemp_c")
                         val maxTempC = forecastDay.getJSONObject("day").getDouble("maxtemp_c")
                         val feelslikeС = current.getString("feelslike_c")
-                        val pressureMb = current.getDouble("pressure_mb") // Добавлено давление
+                        val pressureMb = current.getDouble("pressure_mb") // Добавлено давление на будущее
                         // Создаем список для 5-дневного прогноза
                         val dailyForecasts = mutableListOf<DailyForecast>()
                         for (i in 0 until forecastDays.length()) { // Убедитесь, что цикл проходит по всем дням
@@ -464,8 +456,7 @@ class MainActivity : AppCompatActivity() {
                             swipeRefreshLayout.isRefreshing = false
 
                             cityText.text = "${getString(R.string.city_prefix)} $cityName"
-                            recommendationText.text = getRecommendation(tempC, condition, precipMm, windKph)
-
+                            recommendationText.text = getRecommendation(tempC, precipMm)
 
 
                             // Устанавливаем адаптер для RecyclerView
@@ -656,7 +647,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getWeatherStatus(condition: String): String {
-        val conditionLower = condition.toLowerCase()
+        val conditionLower = condition.lowercase(Locale.ROOT)
         return when (conditionLower) {
             "clear" -> getString(R.string.weather_clear)
             "partly cloudy" -> getString(R.string.weather_partly_cloudy)
@@ -700,7 +691,7 @@ class MainActivity : AppCompatActivity() {
 
 
 
-    private fun getRecommendation(temp: Double, condition: String, precip: Double, wind: Double): String {
+    private fun getRecommendation(temp: Double, precip: Double): String {
         val currentSeason = getCurrentSeason()
 
         return when (currentSeason) {
@@ -818,15 +809,19 @@ class MainActivity : AppCompatActivity() {
         Locale.setDefault(locale)
         val config = resources.configuration
         config.setLocale(locale)
+
+        // Примените новую конфигурацию
+        val context = createConfigurationContext(config)
         resources.updateConfiguration(config, resources.displayMetrics)
 
-        // Save language to shared preferences
+        // Сохраните язык в shared preferences
         val editor = getSharedPreferences("app_preferences", Context.MODE_PRIVATE).edit()
         editor.putString("app_language", lang)
         editor.apply()
 
-        updateTextViews()  // Update UI texts immediately after changing the locale
+        updateTextViews() // Обновите тексты интерфейса сразу после изменения локали
     }
+
     private fun updateTextViews() {
         if (this::cityText.isInitialized) {
             cityText.text = "${getString(R.string.city_prefix)} $currentCityName"
