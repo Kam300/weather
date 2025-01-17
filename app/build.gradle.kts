@@ -53,8 +53,8 @@ android {
 }
 
 dependencies {
-    implementation ("com.yandex.android:mobileads:7.8.1")
-
+    implementation (libs.mobileads)
+    implementation ("com.google.android.material:material:1.5.0")
 
     implementation(libs.androidx.core.ktx) // Up-to-date version
     implementation(libs.okhttp) // Ensure this points to the correct version
@@ -68,7 +68,7 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.swiperefreshlayout)
-    implementation ("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation (libs.okhttp.v4120)
     implementation(libs.androidx.annotation)
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)

@@ -1,16 +1,16 @@
 package com.example.weathertyre
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.example.weathertyre.MainActivity
-import com.example.weathertyre.R
+
 
 class RegisterActivity : AppCompatActivity() {
 
@@ -19,9 +19,8 @@ class RegisterActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_register)
 
-        // Установка Toolbar как ActionBar
-        val toolbar: Toolbar = findViewById(R.id.toolbar)
-        setSupportActionBar(toolbar)
+        val backButton = findViewById<ImageButton>(R.id.back_button)
+        backButton.setOnClickListener { v: View? -> onBackPressed() }
 
         // Добавление кнопки "Назад"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)

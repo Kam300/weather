@@ -1,6 +1,5 @@
 package com.example.weathertyre.ui.login
 
-
 import android.app.Activity
 import android.content.Intent
 import androidx.lifecycle.Observer
@@ -12,14 +11,14 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import android.widget.EditText
 import android.widget.Toast
 import com.example.weather.ui.login.LoggedInUserView
 import com.example.weather.ui.login.LoginViewModel
 import com.example.weather.ui.login.LoginViewModelFactory
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import com.example.weathertyre.MainActivity
 import com.example.weathertyre.databinding.ActivityLoginBinding
-
 import com.example.weathertyre.R
 import com.example.weathertyre.RegisterActivity
 
@@ -31,20 +30,20 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
-
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         val register = binding.register
-        val username = binding.username
-        val password = binding.password
+        val usernameInput = binding.usernameInput // ID TextInputEditText в layout
+        val passwordInput = binding.passwordInput // ID TextInputEditText в layout
         val login = binding.login
         val loading = binding.loading
 
-        register?.setOnClickListener {
-            val intent = Intent(this, RegisterActivity::class.java)
-            startActivity(intent)
+        if (register != null) {
+            register.setOnClickListener {
+                val intent = Intent(this, RegisterActivity::class.java)
+                startActivity(intent)
+            }
         }
 
         loginViewModel = ViewModelProvider(this, LoginViewModelFactory())
@@ -57,10 +56,22 @@ class LoginActivity : AppCompatActivity() {
             login.isEnabled = loginState.isDataValid
 
             if (loginState.usernameError != null) {
-                username.error = getString(loginState.usernameError)
+                if (usernameInput != null) {
+                    usernameInput.error = getString(loginState.usernameError)
+                }
+            } else {
+                if (usernameInput != null) {
+                    usernameInput.error = null
+                }
             }
             if (loginState.passwordError != null) {
-                password.error = getString(loginState.passwordError)
+                if (passwordInput != null) {
+                    passwordInput.error = getString(loginState.passwordError)
+                }
+            } else {
+                if (passwordInput != null) {
+                    passwordInput.error = null
+                }
             }
         })
 
@@ -73,42 +84,70 @@ class LoginActivity : AppCompatActivity() {
             }
             if (loginResult.success != null) {
                 updateUiWithUser(loginResult.success)
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+                setResult(Activity.RESULT_OK)
+                finish()
             }
-            setResult(Activity.RESULT_OK)
-
-            //Complete and destroy login activity once successful
-            finish()
         })
 
-        username.afterTextChanged {
-            loginViewModel.loginDataChanged(
-                username.text.toString(),
-                password.text.toString()
-            )
+        if (usernameInput != null) {
+            usernameInput.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) {
+                    if (passwordInput != null) {
+                        loginViewModel.loginDataChanged(
+                            usernameInput.text.toString(),
+                            passwordInput.text.toString()
+                        )
+                    }
+                }
+
+                override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+            })
         }
 
-        password.apply {
-            afterTextChanged {
-                loginViewModel.loginDataChanged(
-                    username.text.toString(),
-                    password.text.toString()
-                )
-            }
-
-            setOnEditorActionListener { _, actionId, _ ->
-                when (actionId) {
-                    EditorInfo.IME_ACTION_DONE ->
-                        loginViewModel.login(
-                            username.text.toString(),
-                            password.text.toString()
+        if (passwordInput != null) {
+            passwordInput.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) {
+                    if (usernameInput != null) {
+                        loginViewModel.loginDataChanged(
+                            usernameInput.text.toString(),
+                            passwordInput.text.toString()
                         )
+                    }
                 }
-                false
-            }
 
-            login.setOnClickListener {
-                loading.visibility = View.VISIBLE
-                loginViewModel.login(username.text.toString(), password.text.toString())
+                override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+            })
+        }
+
+        if (passwordInput != null) {
+            passwordInput.setOnEditorActionListener { _, actionId, _ ->
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    if (usernameInput != null) {
+                        loginViewModel.login(
+                            usernameInput.text.toString(),
+                            passwordInput.text.toString()
+                        )
+                    }
+                    true
+                } else {
+                    false
+                }
+            }
+        }
+
+        login.setOnClickListener {
+            loading.visibility = View.VISIBLE
+            if (passwordInput != null) {
+                if (usernameInput != null) {
+                    loginViewModel.login(
+                        usernameInput.text.toString(),
+                        passwordInput.text.toString()
+                    )
+                }
             }
         }
     }
@@ -116,36 +155,14 @@ class LoginActivity : AppCompatActivity() {
     private fun updateUiWithUser(model: LoggedInUserView) {
         val welcome = getString(R.string.welcome)
         val displayName = model.displayName
-        // Показать приветственное сообщение
         Toast.makeText(
             applicationContext,
             "$welcome $displayName",
             Toast.LENGTH_LONG
         ).show()
-
-        // Переход на MainActivity
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
-
-        // Завершение LoginActivity
-        finish()
     }
+
     private fun showLoginFailed(@StringRes errorString: Int) {
-        Toast.makeText(applicationContext, errorString, Toast.LENGTH_SHORT).show()
+        Toast.makeText(applicationContext, getString(errorString), Toast.LENGTH_SHORT).show()
     }
-}
-
-/**
- * Extension function to simplify setting an afterTextChanged action to EditText components.
- */
-fun EditText.afterTextChanged(afterTextChanged: (String) -> Unit) {
-    this.addTextChangedListener(object : TextWatcher {
-        override fun afterTextChanged(editable: Editable?) {
-            afterTextChanged.invoke(editable.toString())
-        }
-
-        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-
-        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
-    })
 }
