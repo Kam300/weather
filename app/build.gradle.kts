@@ -11,6 +11,7 @@ android {
     }
     buildFeatures {
         buildConfig = true
+        viewBinding = true
     }
     namespace = "com.example.weathertyre"
     compileSdk = 35
@@ -68,6 +69,9 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.swiperefreshlayout)
     implementation ("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation(libs.androidx.annotation)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
     // Testing libraries
     testImplementation(libs.junit)

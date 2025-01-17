@@ -40,7 +40,7 @@
     <string name="denied_ermission">Permission to access the storage has been denied.</string>
     <string name="get_your_current_location">Couldn t get your current location. Please select a city.</string>
 
-<string name="text3">"Weather for 3 days"</string>
+    <string name="text3">"Weather for 3 days"</string>
     <string name="today">Today</string>
     <string name="tomorrow">Tomorrow</string>
     <string name="day_after_tomorrow">Day After Tomorrow</string>
@@ -68,44 +68,42 @@
     <string name="city_magnitogorsk">Magnitogorsk</string>
 
     <!--  кнопка отмена и сохранить-->
-      <string name="save_button_text">Save</string>
-      <string name="cancel_button_text">Cancel</string>
+    <string name="save_button_text">Save</string>
+    <string name="cancel_button_text">Cancel</string>
 
 
-
-
-          <string name="weather_clear">Clear</string>
-          <string name="weather_partly_cloudy">Partly cloudy</string>
-          <string name="weather_cloudy">Cloudy</string>
-          <string name="weather_overcast">Overcast</string>
-          <string name="weather_mist">Mist</string>
-          <string name="weather_fog">Fog</string>
-          <string name="weather_sand">Sand</string>
-          <string name="weather_dust">Dust</string>
-          <string name="weather_ash">Ash</string>
-          <string name="weather_snow">Snow</string>
-          <string name="weather_snow_showers">Snow showers</string>
-          <string name="weather_hail">Hail</string>
-          <string name="weather_sleet">Sleet</string>
-          <string name="weather_rain">Rain</string>
-          <string name="weather_rain_showers">Rain showers</string>
-          <string name="weather_thunderstorm">Thunderstorm</string>
-          <string name="weather_tornado">Tornado</string>
-          <string name="weather_hurricane">Hurricane</string>
-          <string name="weather_tropical_storm">Tropical storm</string>
-          <string name="weather_cold">Cold</string>
-          <string name="weather_hot">Hot</string>
-          <string name="weather_very_hot">Very hot</string>
-          <string name="weather_very_cold">Very cold</string>
-          <string name="weather_blizzard">Blizzard</string>
-          <string name="weather_extreme_cold">Extreme cold</string>
-          <string name="weather_moderate_rain">Moderate rain</string>
-          <string name="weather_light_snow">Light snow</string>
-          <string name="weather_moderate_snow">Moderate snow</string>
-          <string name="weather_heavy_snow">Heavy snow</string>
-          <string name="weather_patchy_snow_poss">Patchy snow possible</string>
-          <string name="weather_light_snow_showers">Light snow showers</string>
-          <string name="weather_sunny">Sunny</string>
+    <string name="weather_clear">Clear</string>
+    <string name="weather_partly_cloudy">Partly cloudy</string>
+    <string name="weather_cloudy">Cloudy</string>
+    <string name="weather_overcast">Overcast</string>
+    <string name="weather_mist">Mist</string>
+    <string name="weather_fog">Fog</string>
+    <string name="weather_sand">Sand</string>
+    <string name="weather_dust">Dust</string>
+    <string name="weather_ash">Ash</string>
+    <string name="weather_snow">Snow</string>
+    <string name="weather_snow_showers">Snow showers</string>
+    <string name="weather_hail">Hail</string>
+    <string name="weather_sleet">Sleet</string>
+    <string name="weather_rain">Rain</string>
+    <string name="weather_rain_showers">Rain showers</string>
+    <string name="weather_thunderstorm">Thunderstorm</string>
+    <string name="weather_tornado">Tornado</string>
+    <string name="weather_hurricane">Hurricane</string>
+    <string name="weather_tropical_storm">Tropical storm</string>
+    <string name="weather_cold">Cold</string>
+    <string name="weather_hot">Hot</string>
+    <string name="weather_very_hot">Very hot</string>
+    <string name="weather_very_cold">Very cold</string>
+    <string name="weather_blizzard">Blizzard</string>
+    <string name="weather_extreme_cold">Extreme cold</string>
+    <string name="weather_moderate_rain">Moderate rain</string>
+    <string name="weather_light_snow">Light snow</string>
+    <string name="weather_moderate_snow">Moderate snow</string>
+    <string name="weather_heavy_snow">Heavy snow</string>
+    <string name="weather_patchy_snow_poss">Patchy snow possible</string>
+    <string name="weather_light_snow_showers">Light snow showers</string>
+    <string name="weather_sunny">Sunny</string>
     <string name="weather_freezing_fog">Freezing fog</string>
     <string name="weather_blowing_snow">Blowing snow</string>
     <string name="select_politic">Policy</string>
@@ -129,12 +127,21 @@
 
     <string name="it_feels_like">It feels like:</string>
 
-        <string name="select_language">Select Language</string>
-        <string name="restart_required">Restart Required</string>
-        <string name="restart_app_message">The application needs to be restarted to apply the new language. Would you like to restart now?</string>
-        <string name="restart">Restart</string>
-        <string name="cancel">Cancel</string>
-        <!-- Other strings as needed... -->
-<string name="ad">Advertising</string>
+    <string name="select_language">Select Language</string>
+    <string name="restart_required">Restart Required</string>
+    <string name="restart_app_message">The application needs to be restarted to apply the new language. Would you like to restart now?</string>
+    <string name="restart">Restart</string>
+    <string name="cancel">Cancel</string>
+    <!-- Other strings as needed... -->
+    <string name="ad">Advertising</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Welcome !"</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="login_failed">"Login failed"</string>
 
 </resources>
