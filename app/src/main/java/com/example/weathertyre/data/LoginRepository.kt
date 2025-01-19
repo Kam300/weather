@@ -1,6 +1,6 @@
-package com.example.weather.data
+package com.example.weathertyre.data
 
-import com.example.weather.data.model.LoggedInUser
+import com.example.weathertyre.data.model.LoggedInUser
 
 /**
  * Class that requests authentication and user information from the remote data source and

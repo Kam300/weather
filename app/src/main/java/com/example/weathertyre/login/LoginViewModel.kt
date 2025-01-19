@@ -1,11 +1,11 @@
-package com.example.weather.ui.login
+package com.example.weathertyre.login
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import android.util.Patterns
-import com.example.weather.data.LoginRepository
-import com.example.weather.data.Result
+import com.example.weathertyre.data.LoginRepository
+import com.example.weathertyre.data.Result
 
 import com.example.weathertyre.R
 

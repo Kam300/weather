@@ -1,4 +1,4 @@
-package com.example.weather.ui.login
+package com.example.weathertyre.login
 
 /**
  * Authentication result : success (user details) or error message.

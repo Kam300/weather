@@ -39,7 +39,6 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.example.weather.DailyForecastAdapter
 import com.example.weathertyre.databinding.ActivityMainBinding
 
 

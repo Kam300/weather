@@ -1,4 +1,4 @@
-package com.example.weather
+package com.example.weathertyre
 
 import android.view.LayoutInflater
 import android.view.View
@@ -7,8 +7,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.weathertyre.DailyForecast
-import com.example.weathertyre.R
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale

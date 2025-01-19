@@ -12,11 +12,9 @@ import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
-import com.example.weather.ui.login.LoggedInUserView
-import com.example.weather.ui.login.LoginViewModel
-import com.example.weather.ui.login.LoginViewModelFactory
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
+import com.example.weathertyre.login.LoggedInUserView
+import com.example.weathertyre.login.LoginViewModel
+import com.example.weathertyre.login.LoginViewModelFactory
 import com.example.weathertyre.MainActivity
 import com.example.weathertyre.databinding.ActivityLoginBinding
 import com.example.weathertyre.R

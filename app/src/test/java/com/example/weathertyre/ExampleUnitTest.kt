@@ -1,4 +1,4 @@
-package com.example.weather
+package com.example.weathertyre
 
 import org.junit.Test
 

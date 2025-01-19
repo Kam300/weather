@@ -1,4 +1,4 @@
-package com.example.weather.data.model
+package com.example.weathertyre.data.model
 
 /**
  * Data class that captures user information for logged in users retrieved from LoginRepository

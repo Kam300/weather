@@ -1,4 +1,4 @@
-package com.example.weather.ui.login
+package com.example.weathertyre.login
 
 /**
  * Data validation state of the login form.

@@ -1,4 +1,4 @@
-package com.example.weather.ui.login
+package com.example.weathertyre.login
 
 /**
  * User details post authentication that is exposed to the UI

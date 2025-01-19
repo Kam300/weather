@@ -23,8 +23,8 @@ squareupOkhttp = "4.12.0"
 swiperefreshlayout = "1.1.0"
 playServicesAdsLite = "23.6.0"
 annotation = "1.9.1"
-lifecycleLivedataKtx = "2.6.1"
-lifecycleViewmodelKtx = "2.6.1"
+lifecycleLivedataKtx = "2.8.7"
+lifecycleViewmodelKtx = "2.8.7"
 
 [libraries]
 androidx-appcompat-v131 = { module = "androidx.appcompat:appcompat", version.ref = "appcompatVersion" }

@@ -1,9 +1,9 @@
-package com.example.weather.ui.login
+package com.example.weathertyre.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.weather.data.LoginDataSource
-import com.example.weather.data.LoginRepository
+import com.example.weathertyre.data.LoginDataSource
+import com.example.weathertyre.data.LoginRepository
 
 /**
  * ViewModel provider factory to instantiate LoginViewModel.

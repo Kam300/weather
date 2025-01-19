@@ -1,4 +1,4 @@
-//package com.example.weathertyre
+package com.example.weathertyre//package com.example.weathertyre
 //
 //import android.view.LayoutInflater
 //import android.view.View
