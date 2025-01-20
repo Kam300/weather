@@ -1,4 +1,4 @@
-package com.example.weathertyre.ui.login
+package com.example.weathertyre.login
 
 import android.app.Activity
 import android.content.Intent
@@ -12,9 +12,7 @@ import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
-import com.example.weathertyre.login.LoggedInUserView
-import com.example.weathertyre.login.LoginViewModel
-import com.example.weathertyre.login.LoginViewModelFactory
+import com.example.weathertyre.DatabaseHelper
 import com.example.weathertyre.MainActivity
 import com.example.weathertyre.databinding.ActivityLoginBinding
 import com.example.weathertyre.R
@@ -25,9 +23,20 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var loginViewModel: LoginViewModel
     private lateinit var binding: ActivityLoginBinding
 
+    private lateinit var dbHelper: DatabaseHelper
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+
+        dbHelper = DatabaseHelper()
+
+        // Проверяем, залогинен ли пользователь
+        if (dbHelper.isUserLoggedIn()) {
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+            return
+        }
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

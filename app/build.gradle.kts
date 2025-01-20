@@ -87,6 +87,12 @@ dependencies {
     implementation(libs.androidx.annotation)
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation ("org.postgresql:postgresql:42.2.27")
+    implementation ("io.github.jan-tennert.supabase:postgrest-kt:1.4.7")
+    implementation ("io.github.jan-tennert.supabase:gotrue-kt:1.4.7")
+    implementation ("io.ktor:ktor-client-android:2.3.7")
+    implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
 
     // Testing libraries
     testImplementation(libs.junit)

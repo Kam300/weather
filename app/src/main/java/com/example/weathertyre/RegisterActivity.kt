@@ -11,6 +11,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class RegisterActivity : AppCompatActivity() {
     private var verificationCode: String = ""
@@ -21,12 +25,13 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var registerButton: Button
     private lateinit var verifyCodeEditText: EditText
     private lateinit var backButton: ImageButton
+    private lateinit var dbHelper: DatabaseHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_register)
-
+        dbHelper = DatabaseHelper()
         initializeViews()
         setupListeners()
     }
@@ -38,8 +43,6 @@ class RegisterActivity : AppCompatActivity() {
         registerButton = findViewById(R.id.register_button)
         verifyCodeEditText = findViewById(R.id.verification_code)
         backButton = findViewById(R.id.back_button)
-
-        // Изначально скрываем поле для ввода кода
         verifyCodeEditText.visibility = View.GONE
     }
 
@@ -107,12 +110,14 @@ class RegisterActivity : AppCompatActivity() {
                     registerButton.isEnabled = true
                     showToast("Ошибка отправки: ${e.message}")
                 }
-  1          }
+            }
         }.start()
     }
 
     private fun verifyCode() {
         val enteredCode = verifyCodeEditText.text.toString().trim()
+        val email = emailEditText.text.toString().trim()
+        val password = passwordEditText.text.toString()
 
         when {
             enteredCode.isEmpty() -> {
@@ -120,7 +125,21 @@ class RegisterActivity : AppCompatActivity() {
                 return
             }
             enteredCode == verificationCode -> {
-                proceedToMainActivity()
+                // Регистрация пользователя в базе данных
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        dbHelper.registerUser(email, password)
+                        withContext(Dispatchers.Main) {
+                            showToast("Регистрация успешна")
+                            proceedToMainActivity()
+                        }
+                    } catch (e: Exception) {
+                        withContext(Dispatchers.Main) {
+                            showToast(e.message ?: "Ошибка регистрации")
+                            registerButton.isEnabled = true
+                        }
+                    }
+                }
             }
             else -> {
                 showToast("Неверный код подтверждения")
@@ -134,6 +153,11 @@ class RegisterActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
+
+
+
+
+
 
     private fun generateVerificationCode(): String {
         return (100000..999999).random().toString()
