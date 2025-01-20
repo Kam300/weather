@@ -11,16 +11,16 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import kotlin.math.round
-
-class DailyForecastAdapter(private val forecasts: List<DailyForecast>) : RecyclerView.Adapter<DailyForecastAdapter.ViewHolder>() {
+class DailyForecastAdapter(
+    private val forecasts: List<DailyForecast>,
+    private val temperatureUnit: String // Добавляем параметр для единицы измерения
+) : RecyclerView.Adapter<DailyForecastAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val dateText: TextView = view.findViewById(R.id.dateText)
         val maxTempText: TextView = view.findViewById(R.id.maxTempText)
         val minTempText: TextView = view.findViewById(R.id.minTempText)
         val conditionIcon: ImageView = view.findViewById(R.id.conditionIcon)
-
-        // Добавьте ссылки на подписи
         val dateTextLabel: TextView = view.findViewById(R.id.dateTextLabel)
         val maxTempLabel: TextView = view.findViewById(R.id.maxTempLabel)
         val minTempLabel: TextView = view.findViewById(R.id.minTempLabel)
@@ -29,6 +29,14 @@ class DailyForecastAdapter(private val forecasts: List<DailyForecast>) : Recycle
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_daily_forecast, parent, false)
         return ViewHolder(view)
+    }
+
+    private fun convertTemperature(celsius: Double): Double {
+        return if (temperatureUnit == "F") {
+            celsius * 9/5 + 32 // Конвертация в Фаренгейты
+        } else {
+            celsius // Оставляем Цельсии
+        }
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -63,9 +71,14 @@ class DailyForecastAdapter(private val forecasts: List<DailyForecast>) : Recycle
         }
 
         holder.dateText.text = dateText
-        // Округление температуры до целого числа
-        holder.maxTempText.text = "${round(forecast.maxTemp).toInt()} °C"
-        holder.minTempText.text = "${round(forecast.minTemp).toInt()} °C"
+
+        // Конвертация и округление температуры
+        val maxTemp = convertTemperature(forecast.maxTemp)
+        val minTemp = convertTemperature(forecast.minTemp)
+
+        // Форматирование строк температуры
+        holder.maxTempText.text = "${round(maxTemp).toInt()} °$temperatureUnit"
+        holder.minTempText.text = "${round(minTemp).toInt()} °$temperatureUnit"
 
         Glide.with(holder.itemView.context)
             .load("https:${forecast.conditionIcon}")

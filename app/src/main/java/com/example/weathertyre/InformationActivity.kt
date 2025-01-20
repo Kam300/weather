@@ -29,6 +29,9 @@ import android.provider.Settings
 import android.util.Log
 
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.lifecycle.lifecycleScope
+import io.github.jan.supabase.gotrue.gotrue
+import kotlinx.coroutines.launch
 
 import java.util.Locale
 
@@ -40,12 +43,13 @@ class InformationActivity : AppCompatActivity() {
     private val currentVersion = "1.1.0"
     private val REQUEST_CODE_STORAGE = 1001 // Код запроса для разрешений
     @SuppressLint("MissingInflatedId")
-
-
+    private lateinit var databaseHelper: DatabaseHelper
+    private lateinit var temperatureUnitButton: Button
     override fun onCreate(savedInstanceState: Bundle?) {
         // Проверка сохраненной темы
         setThemeAccordingToPreference() // Устанавливаем тему перед вызовом super.onCreate()
         val savedLanguage = getSavedLanguage()
+        databaseHelper = DatabaseHelper()
         setLocale(savedLanguage) // Устанавливаем язык при запуске Activity
         super.onCreate(savedInstanceState)
 
@@ -62,6 +66,7 @@ class InformationActivity : AppCompatActivity() {
         val themeSettingsButton: Button = findViewById(R.id.themeSettingsButton )
         val languageSettingsButton: Button = findViewById(R.id.languageSettingsButton)
         val politicButton: Button = findViewById(R.id.politicButton)
+
         languageSettingsButton.setOnClickListener {
             showLanguageSelectionDialog()
         }
@@ -71,7 +76,11 @@ class InformationActivity : AppCompatActivity() {
         }
 
 
-
+        temperatureUnitButton = findViewById(R.id.temperatureUnitButton)
+        temperatureUnitButton.setOnClickListener {
+            showTemperatureUnitDialog()
+        }
+        loadCurrentTemperatureUnit()
 //
 //        linkButton2.setOnClickListener {
 //            val url = "http://comgamedev.gilect.net/?i=1"
@@ -290,6 +299,77 @@ class InformationActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
         return !prefs.contains("dark_mode")
     }
+    private fun showTemperatureUnitDialog() {
+        val units = arrayOf(getString(R.string.celsius), getString(R.string.fahrenheit))
 
+        // Получаем текущую единицу измерения для установки правильного выбора
+        lifecycleScope.launch {
+            try {
+                val userId = databaseHelper.supabase.gotrue.currentSessionOrNull()?.user?.id
+                if (userId != null) {
+                    val currentUnit = databaseHelper.getTemperatureUnit(userId)
+                    val currentSelection = if (currentUnit == "C") 0 else 1
 
+                    AlertDialog.Builder(this@InformationActivity)
+                        .setTitle(getString(R.string.select_temperature_unit))
+                        .setSingleChoiceItems(units, currentSelection) { dialog, which ->
+                            val unit = if (which == 0) "C" else "F"
+                            lifecycleScope.launch {
+                                try {
+                                    databaseHelper.saveTemperatureUnit(userId, unit)
+                                    updateTemperatureUnitButton(unit)
+                                    Toast.makeText(
+                                        this@InformationActivity,
+                                        getString(R.string.temperature_unit_saved),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                } catch (e: Exception) {
+                                    Toast.makeText(
+                                        this@InformationActivity,
+                                        e.message,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                            dialog.dismiss()
+                        }
+                        .setNegativeButton(getString(R.string.cancel), null)
+                        .show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@InformationActivity,
+                    e.message,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    private fun loadCurrentTemperatureUnit() {
+        lifecycleScope.launch {
+            try {
+                val userId = databaseHelper.supabase.gotrue.currentSessionOrNull()?.user?.id
+                if (userId != null) {
+                    val unit = databaseHelper.getTemperatureUnit(userId)
+                    updateTemperatureUnitButton(unit)
+                }
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@InformationActivity,
+                    e.message,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    private fun updateTemperatureUnitButton(unit: String) {
+        val unitText = if (unit == "C") {
+            getString(R.string.celsius)
+        } else {
+            getString(R.string.fahrenheit)
+        }
+        temperatureUnitButton.text = getString(R.string.current_temperature_unit, unitText)
+    }
 }

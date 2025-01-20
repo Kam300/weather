@@ -36,6 +36,8 @@ import android.widget.ImageButton
 import android.widget.ScrollView
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
+import androidx.core.text.util.LocalePreferences.getTemperatureUnit
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -49,6 +51,10 @@ import com.yandex.mobile.ads.common.AdRequest
 import com.yandex.mobile.ads.common.AdRequestError
 import com.yandex.mobile.ads.common.ImpressionData
 import com.yandex.mobile.ads.common.MobileAds
+import io.github.jan.supabase.gotrue.gotrue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -73,7 +79,7 @@ class MainActivity : AppCompatActivity() {
 
     private var bannerAd: BannerAdView? = null
     private lateinit var binding: ActivityMainBinding
-
+    private lateinit var databaseHelper: DatabaseHelper
     private val adSize: BannerAdSize
         get() {
             // Calculate the width of the ad, taking into account the padding in the ad container.
@@ -91,7 +97,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         setLocale(getSavedLanguage()) // Set the language before super
         super.onCreate(savedInstanceState)
-
+        databaseHelper = DatabaseHelper()
         // Инициализация View Binding
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -389,130 +395,141 @@ class MainActivity : AppCompatActivity() {
 
     private fun fetchWeatherData(location: String) {
         if (!isInternetAvailable()) {
-            showError(getString(R.string.error_message_no_internet)) // Отображаем сообщение об отсутствии интернета
+            showError(getString(R.string.error_message_no_internet))
             return
         }
         progressBar.visibility = View.VISIBLE
-        swipeRefreshLayout.isRefreshing = true // Показать индикатор обновления
+        swipeRefreshLayout.isRefreshing = true
 
-        thread {
-            val client = OkHttpClient()
-            val apiKey = "8781514e8a924488b99124630242610"
-            val request = Request.Builder()
-                .url("https://api.weatherapi.com/v1/forecast.json?key=$apiKey&q=$location&days=5")
-                .build()
+        lifecycleScope.launch {
+            try {
+                val temperatureUnit = getTemperatureUnit()
 
-            client.newCall(request).execute().use { response: Response ->
-                if (response.isSuccessful) {
-                    val jsonData = response.body.string()
-                    jsonData.let {
-                        val jsonObject = JSONObject(it)
-                        val forecast = jsonObject.getJSONObject("forecast")
-                        val forecastDays = forecast.getJSONArray("forecastday") // Извлечение массива forecastday
-                        val forecastDay = forecast.getJSONArray("forecastday").getJSONObject(0)
+                thread {
+                    val client = OkHttpClient()
+                    val apiKey = "8781514e8a924488b99124630242610"
+                    val request = Request.Builder()
+                        .url("https://api.weatherapi.com/v1/forecast.json?key=$apiKey&q=$location&days=5")
+                        .build()
 
-                        val locationObject = jsonObject.getJSONObject("location")
-                        val current = jsonObject.getJSONObject("current")
+                    client.newCall(request).execute().use { response: Response ->
+                        if (response.isSuccessful) {
+                            val jsonData = response.body.string()
+                            jsonData.let {
+                                val jsonObject = JSONObject(it)
+                                val forecast = jsonObject.getJSONObject("forecast")
+                                val forecastDays = forecast.getJSONArray("forecastday")
+                                val forecastDay = forecastDays.getJSONObject(0)
 
-                        val cityName = locationObject.getString("name")
-                        val tempC = current.getDouble("temp_c")
-                        val condition = current.getJSONObject("condition").getString("text")
-                        val precipMm = current.getDouble("precip_mm")
-                        val humidity = current.getDouble("humidity")
-                        val windKph = current.getDouble("wind_kph")
-                        val weatherIconUrl = current.getJSONObject("condition").getString("icon")
-                        val lastUpdated = current.getString("last_updated")
-                        val minTempC = forecastDay.getJSONObject("day").getDouble("mintemp_c")
-                        val maxTempC = forecastDay.getJSONObject("day").getDouble("maxtemp_c")
-                        val feelslikeС = current.getString("feelslike_c")
-                        val pressureMb = current.getDouble("pressure_mb") // Добавлено давление на будущее
-                        // Создаем список для 5-дневного прогноза
-                        val dailyForecasts = mutableListOf<DailyForecast>()
-                        for (i in 0 until forecastDays.length()) { // Убедитесь, что цикл проходит по всем дням
-                            val day = forecastDays.getJSONObject(i)
-                            val date = day.getString("date")
-                            val dayInfo = day.getJSONObject("day")
-                            val maxTemp = dayInfo.getDouble("maxtemp_c")
-                            val minTemp = dayInfo.getDouble("mintemp_c")
-                            val conditionText = dayInfo.getJSONObject("condition").getString("text")
-                            val conditionIcon = dayInfo.getJSONObject("condition").getString("icon")
+                                val locationObject = jsonObject.getJSONObject("location")
+                                val current = jsonObject.getJSONObject("current")
 
-                            dailyForecasts.add(DailyForecast(date, maxTemp, minTemp, conditionText, conditionIcon))
-                        }
+                                val cityName = locationObject.getString("name")
+                                val tempC = current.getDouble("temp_c")
+                                val condition = current.getJSONObject("condition").getString("text")
+                                val precipMm = current.getDouble("precip_mm")
+                                val humidity = current.getDouble("humidity")
+                                val windKph = current.getDouble("wind_kph")
+                                val weatherIconUrl = current.getJSONObject("condition").getString("icon")
+                                val lastUpdated = current.getString("last_updated")
+                                val minTempC = forecastDay.getJSONObject("day").getDouble("mintemp_c")
+                                val maxTempC = forecastDay.getJSONObject("day").getDouble("maxtemp_c")
+                                val feelslikeC = current.getString("feelslike_c")
 
+                                // Создаем список для 5-дневного прогноза
+                                val dailyForecasts = mutableListOf<DailyForecast>()
+                                for (i in 0 until forecastDays.length()) {
+                                    val day = forecastDays.getJSONObject(i)
+                                    val date = day.getString("date")
+                                    val dayInfo = day.getJSONObject("day")
+                                    val maxTemp = dayInfo.getDouble("maxtemp_c")
+                                    val minTemp = dayInfo.getDouble("mintemp_c")
+                                    val conditionText = dayInfo.getJSONObject("condition").getString("text")
+                                    val conditionIcon = dayInfo.getJSONObject("condition").getString("icon")
 
-                        // Получаем данные на следующие 24 часа
-                        val hourlyWeatherList = getHourlyWeatherForNext24Hours(forecastDays)
+                                    dailyForecasts.add(
+                                        DailyForecast(
+                                            date,
+                                            maxTemp,
+                                            minTemp,
+                                            conditionText,
+                                            conditionIcon
+                                        )
+                                    )
+                                }
 
-                        currentCityName = cityName
-                        saveCurrentCity(cityName)
+                                // Получаем данные на следующие 24 часа
+                                val hourlyWeatherList = getHourlyWeatherForNext24Hours(forecastDays)
 
+                                currentCityName = cityName
+                                saveCurrentCity(cityName)
 
+                                runOnUiThread {
+                                    progressBar.visibility = View.GONE
+                                    swipeRefreshLayout.isRefreshing = false
 
+                                    cityText.text = "${getString(R.string.city_prefix)} $cityName"
+                                    recommendationText.text = getRecommendation(tempC, precipMm)
 
-                        runOnUiThread {
-                            progressBar.visibility = View.GONE
-                            swipeRefreshLayout.isRefreshing = false
+                                    // Обновляем адаптеры
+                                    val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
+                                    recyclerView.layoutManager = LinearLayoutManager(
+                                        this@MainActivity,
+                                        LinearLayoutManager.HORIZONTAL,
+                                        false
+                                    )
+                                    recyclerView.adapter = HourlyWeatherAdapter(hourlyWeatherList, temperatureUnit)
 
-                            cityText.text = "${getString(R.string.city_prefix)} $cityName"
-                            recommendationText.text = getRecommendation(tempC, precipMm)
+                                    val recyclerView1 = findViewById<RecyclerView>(R.id.recyclerView1)
+                                    recyclerView1.layoutManager = LinearLayoutManager(this@MainActivity)
+                                    recyclerView1.adapter = DailyForecastAdapter(dailyForecasts, temperatureUnit)
 
+                                    // Обновляем иконку погоды
+                                    if (!isDestroyed) {
+                                        val iconUrl = "https:${weatherIconUrl}"
+                                        Glide.with(this@MainActivity)
+                                            .load(iconUrl)
+                                            .into(weatherImage)
+                                    }
 
-                            // Устанавливаем адаптер для RecyclerView
-                            val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
-                            recyclerView.layoutManager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.HORIZONTAL, false)
-                            recyclerView.adapter = HourlyWeatherAdapter(hourlyWeatherList)
+                                    // Обновляем все текстовые поля с температурой
+                                    findViewById<TextView>(R.id.weatherStatus).text = getWeatherStatus(condition)
+                                    findViewById<TextView>(R.id.tempValue).text = getTemperatureString(tempC, temperatureUnit)
+                                    findViewById<TextView>(R.id.mintempCValue).text = getTemperatureString(minTempC, temperatureUnit)
+                                    findViewById<TextView>(R.id.maxtempCValue).text = getTemperatureString(maxTempC, temperatureUnit)
+                                    findViewById<TextView>(R.id.avgValue).text = getTemperatureString(feelslikeC.toDouble(), temperatureUnit)
 
-                            val recyclerView1 = findViewById<RecyclerView>(R.id.recyclerView1)
-                            recyclerView1.layoutManager = LinearLayoutManager(this)
-                            recyclerView1.adapter = DailyForecastAdapter(dailyForecasts)
+                                    // Обновляем остальные метеоданные
+                                    findViewById<TextView>(R.id.precipValue).text = "$humidity %"
+                                    findViewById<TextView>(R.id.precipMmValue).text = "$precipMm мм"
 
-                            if (!isDestroyed) {
-                                val iconUrl = "https:${weatherIconUrl}"
-                                Glide.with(this@MainActivity)
-                                    .load(iconUrl)
-                                    .into(weatherImage)
+                                    val windMps = windKph / 3.6
+                                    findViewById<TextView>(R.id.windValue).text = "%.1f м/с".format(windMps)
+
+                                    val windDirection = current.getString("wind_dir")
+                                    setWindDirection(windDirection)
+
+                                    // Обновляем время последнего обновления
+                                    lastUpdatedText.text = "${getString(R.string.last_updated)}: $lastUpdated"
+                                }
                             }
-
-                            findViewById<TextView>(R.id.weatherStatus).text = getWeatherStatus(condition)
-                            findViewById<TextView>(R.id.tempValue).text = "$tempC °C"
-                            findViewById<TextView>(R.id.precipValue).text = "$humidity %"
-
-                            val windMps = windKph / 3.6
-                            findViewById<TextView>(R.id.windValue).text = "%.1f м/с".format(windMps)
-
-                            val windDirection = current.getString("wind_dir")
-                            setWindDirection(windDirection)
-
-
-                            findViewById<TextView>(R.id.precipMmValue).text= "$precipMm мм"
-
-                            findViewById<TextView>(R.id.mintempCValue).text= "$minTempC °C"
-
-                            findViewById<TextView>(R.id. maxtempCValue).text= "$maxTempC °C"
-
-
-                            findViewById<TextView>(R.id. avgValue).text= "$feelslikeС °C"
-
-                            // Устанавливаем время последнего обновления
-                            lastUpdatedText.text = "${getString(R.string.last_updated)}: $lastUpdated" //Последнее обновление:
-
+                        } else {
+                            runOnUiThread {
+                                progressBar.visibility = View.GONE
+                                swipeRefreshLayout.isRefreshing = false
+                                showError(getString(R.string.error_message_fetch_data))
+                            }
                         }
                     }
-                } else {
-                    runOnUiThread {
-                        progressBar.visibility = View.GONE
-                        swipeRefreshLayout.isRefreshing = false  // Скрываем индикатор обновления
-                        showError(getString(R.string.error_message_fetch_data)) //Ошибка загрузки данных. Попробуйте снова.
-
-                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    progressBar.visibility = View.GONE
+                    swipeRefreshLayout.isRefreshing = false
+                    showError(e.message ?: getString(R.string.error_message_fetch_data))
                 }
             }
         }
-
-
-
-
     }
 
     private fun setWindDirection(windDirection: String) {
@@ -598,7 +615,6 @@ class MainActivity : AppCompatActivity() {
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
         val hourlyWeatherList = mutableListOf<HourlyWeather>()
 
-        // Проходим по всем доступным дням прогноза
         for (dayIndex in 0 until forecastDays.length()) {
             val dayData = forecastDays.getJSONObject(dayIndex)
             val hourlyForecast = dayData.getJSONArray("hour")
@@ -609,15 +625,12 @@ class MainActivity : AppCompatActivity() {
                 val hourTempC = hourData.getDouble("temp_c")
                 val hourIconUrl = hourData.getJSONObject("condition").getString("icon")
 
-                // Преобразуем строку времени в LocalDateTime
                 val forecastTime = LocalDateTime.parse(time, formatter)
 
-                // Добавляем данные, если они находятся в пределах следующих 24 часов
                 if (forecastTime.isAfter(currentDateTime) || forecastTime.isEqual(currentDateTime)) {
                     hourlyWeatherList.add(HourlyWeather(time, hourTempC, hourIconUrl))
                 }
 
-                // Останавливаем, если собрали 24 часа
                 if (hourlyWeatherList.size == 24) {
                     return hourlyWeatherList
                 }
@@ -833,7 +846,31 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private suspend fun getTemperatureUnit(): String {
+        return try {
+            val userId = databaseHelper.supabase.gotrue.currentSessionOrNull()?.user?.id
+            if (userId != null) {
+                databaseHelper.getTemperatureUnit(userId)
+            } else {
+                "C"
+            }
+        } catch (e: Exception) {
+            "C"
+        }
+    }
 
+    private fun convertTemperature(celsius: Double, unit: String): Double {
+        return if (unit == "F") {
+            celsius * 9/5 + 32
+        } else {
+            celsius
+        }
+    }
+
+    private fun getTemperatureString(temp: Double, unit: String): String {
+        val convertedTemp = convertTemperature(temp, unit)
+        return "${String.format("%.1f", convertedTemp)} °$unit"
+    }
 
 }
 data class HourlyWeather(

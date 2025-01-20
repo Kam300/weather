@@ -112,6 +112,18 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/checkUpdateButton" />
 
+
+        <Button
+            android:id="@+id/temperatureUnitButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/rounded_button"
+            android:text="@string/select_temperature_unit"
+            android:textColor="?android:attr/textColorPrimary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/politicButton" />
     </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 

@@ -1,9 +1,8 @@
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    kotlin("plugin.serialization") version "1.9.21" // Добавьте эту строку
 }
-
 android {
 
     viewBinding {
@@ -67,36 +66,42 @@ android {
 }
 
 dependencies {
-    implementation (libs.mobileads)
-    implementation (libs.material.v150)
-    implementation (libs.android.mail)
-    implementation (libs.android.activation)
-    implementation(libs.androidx.core.ktx) // Up-to-date version
-    implementation(libs.okhttp) // Ensure this points to the correct version
-    implementation(libs.gson) // Ensure this points to the correct version
+    // Существующие зависимости
+    implementation(libs.mobileads)
+    implementation(libs.material.v150)
+    implementation(libs.android.mail)
+    implementation(libs.android.activation)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.okhttp)
+    implementation(libs.gson)
     implementation(libs.androidx.drawerlayout)
     implementation(libs.glide)
-    implementation(libs.gms.play.services.location) // Если не требуется, также можно удалить
+    implementation(libs.gms.play.services.location)
     implementation(libs.cardview)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.swiperefreshlayout)
-    implementation (libs.okhttp.v4120)
+    implementation(libs.okhttp.v4120)
     implementation(libs.androidx.annotation)
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation ("org.postgresql:postgresql:42.2.27")
-    implementation ("io.github.jan-tennert.supabase:postgrest-kt:1.4.7")
-    implementation ("io.github.jan-tennert.supabase:gotrue-kt:1.4.7")
-    implementation ("io.ktor:ktor-client-android:2.3.7")
-    implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
-    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    implementation("org.postgresql:postgresql:42.2.27")
 
-    // Testing libraries
+    // Supabase и связанные зависимости
+    implementation("io.github.jan-tennert.supabase:postgrest-kt:1.4.7")
+    implementation("io.github.jan-tennert.supabase:gotrue-kt:1.4.7")
+    implementation("io.github.jan-tennert.supabase:realtime-kt:1.4.7")
+    implementation("io.ktor:ktor-client-android:2.3.7")
+    implementation("io.ktor:ktor-client-core:2.3.7")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+
+    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
-
