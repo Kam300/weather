@@ -25,6 +25,20 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+    packaging {
+        resources {
+            pickFirst("META-INF/NOTICE.md")
+            pickFirst("META-INF/LICENSE.md")
+            excludes.add("META-INF/DEPENDENCIES")
+            excludes.add("META-INF/LICENSE")
+            excludes.add("META-INF/LICENSE.txt")
+            excludes.add("META-INF/NOTICE")
+            excludes.add("META-INF/NOTICE.txt")
+            excludes.add("META-INF/ASL2.0")
+            excludes.add("META-INF/*.kotlin_module")
+        }
+    }
+
 
 
     buildTypes {
@@ -54,8 +68,9 @@ android {
 
 dependencies {
     implementation (libs.mobileads)
-    implementation ("com.google.android.material:material:1.5.0")
-
+    implementation (libs.material.v150)
+    implementation (libs.android.mail)
+    implementation (libs.android.activation)
     implementation(libs.androidx.core.ktx) // Up-to-date version
     implementation(libs.okhttp) // Ensure this points to the correct version
     implementation(libs.gson) // Ensure this points to the correct version
