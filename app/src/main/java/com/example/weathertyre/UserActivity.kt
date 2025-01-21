@@ -48,8 +48,9 @@ data class UserProfile(
 
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
+        setLocale(getSavedLanguage()) // Set the language before super
         super.onCreate(savedInstanceState)
-
+        setThemeAccordingToPreference()
         try {
             binding = ActivityUserBinding.inflate(layoutInflater)
             setContentView(binding.root)
@@ -208,6 +209,34 @@ data class UserProfile(
             }
         }
     }
+
+    private fun setLocale(lang: String) {
+        val locale = Locale(lang)
+        Locale.setDefault(locale)
+        val config = resources.configuration
+        config.setLocale(locale)
+
+        // Примените новую конфигурацию
+        val context = createConfigurationContext(config)
+        resources.updateConfiguration(config, resources.displayMetrics)
+
+        // Сохраните язык в shared preferences
+        val editor = getSharedPreferences("app_preferences", Context.MODE_PRIVATE).edit()
+        editor.putString("app_language", lang)
+        editor.apply()
+
+
+    }
+    private fun getSavedLanguage(): String {
+        val prefs = getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
+        val savedLanguage = prefs.getString("app_language", null)
+
+        // Return saved language if exists, or device's default language
+        return savedLanguage ?: Locale.getDefault().language
+    }
+
+
+
     @RequiresApi(Build.VERSION_CODES.N)
     private fun loadUserProfile() {
         lifecycleScope.launch {

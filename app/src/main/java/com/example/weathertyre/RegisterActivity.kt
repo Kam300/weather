@@ -1,5 +1,6 @@
 package com.example.weathertyre
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -9,12 +10,14 @@ import android.widget.ImageButton
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Locale
 
 class RegisterActivity : AppCompatActivity() {
     private var verificationCode: String = ""
@@ -28,10 +31,12 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var dbHelper: DatabaseHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setLocale(getSavedLanguage()) // Set the language before super
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_register)
         dbHelper = DatabaseHelper()
+        setThemeAccordingToPreference()
         initializeViews()
         setupListeners()
     }
@@ -170,4 +175,54 @@ class RegisterActivity : AppCompatActivity() {
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
+
+
+    private fun setThemeAccordingToPreference() {
+        when {
+            isDarkModeEnabled() -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            isDarkModeNotSet() -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+            else -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        }
+
+
+    }
+
+
+
+    private fun setLocale(lang: String) {
+        val locale = Locale(lang)
+        Locale.setDefault(locale)
+        val config = resources.configuration
+        config.setLocale(locale)
+
+        // Примените новую конфигурацию
+        val context = createConfigurationContext(config)
+        resources.updateConfiguration(config, resources.displayMetrics)
+
+        // Сохраните язык в shared preferences
+        val editor = getSharedPreferences("app_preferences", Context.MODE_PRIVATE).edit()
+        editor.putString("app_language", lang)
+        editor.apply()
+
+
+    }
+
+
+    private fun isDarkModeEnabled(): Boolean {
+        return getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
+            .getBoolean("dark_mode", false)
+    }
+
+    private fun isDarkModeNotSet(): Boolean {
+        val prefs = getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
+        return !prefs.contains("dark_mode")
+    }
+    private fun getSavedLanguage(): String {
+        val prefs = getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
+        val savedLanguage = prefs.getString("app_language", null)
+
+        // Return saved language if exists, or device's default language
+        return savedLanguage ?: Locale.getDefault().language
+    }
+
 }
