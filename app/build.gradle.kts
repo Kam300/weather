@@ -88,7 +88,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation("org.postgresql:postgresql:42.2.27")
-
+    implementation("androidx.cardview:cardview:1.0.0")
     // Supabase и связанные зависимости
     implementation("io.github.jan-tennert.supabase:postgrest-kt:1.4.7")
     implementation("io.github.jan-tennert.supabase:gotrue-kt:1.4.7")
@@ -99,6 +99,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    implementation(libs.protolite.well.known.types)
 
     // Testing
     testImplementation(libs.junit)

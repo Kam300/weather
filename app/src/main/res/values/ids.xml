@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="profileTitle" type="id" />
+    <item name="emailLabel" type="id" />
+    <item name="backButton" type="id" />
+    <item name="emailText" type="id" />
+    <item name="registrationDateLabel" type="id" />
+    <item name="registrationDateText" type="id" />
+    <item name="logoutButton" type="id" />
+    <item name="deleteAccountButton" type="id" />
+</resources>

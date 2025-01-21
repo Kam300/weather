@@ -60,12 +60,13 @@ class InformationActivity : AppCompatActivity() {
 //        requestStoragePermissions()
 
         val linkButton: Button = findViewById(R.id.linkButton)
-//        val linkButton2: Button = findViewById(R.id.linkButton22)
+//      val linkButton2: Button = findViewById(R.id.linkButton22)
         val checkUpdateButton: Button = findViewById(R.id.checkUpdateButton)
         val beforeButton: Button = findViewById(R.id.beforeButton)
         val themeSettingsButton: Button = findViewById(R.id.themeSettingsButton )
         val languageSettingsButton: Button = findViewById(R.id.languageSettingsButton)
         val politicButton: Button = findViewById(R.id.politicButton)
+        val userButton : Button = findViewById(R.id.UserButton)
 
         languageSettingsButton.setOnClickListener {
             showLanguageSelectionDialog()
@@ -100,6 +101,13 @@ class InformationActivity : AppCompatActivity() {
         beforeButton.setOnClickListener {
             finish()
         }
+
+        // Настройка кнопки профиля
+        userButton.setOnClickListener {
+            val intent = Intent(this, UserActivity::class.java)
+            startActivity(intent)
+        }
+
         politicButton.setOnClickListener {
             val url2 = "https://doc-hosting.flycricket.io/politika-konfidentsialnosti-weathertyre/bfd977ea-972e-47a4-8617-e3bf18b851c8/privacy"
             val intent1 = Intent(Intent.ACTION_VIEW, Uri.parse(url2))

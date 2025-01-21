@@ -1,14 +1,17 @@
 package com.example.weathertyre
 
+import android.util.Log
 import io.github.jan.supabase.exceptions.RestException
 import io.github.jan.supabase.gotrue.gotrue
 import io.github.jan.supabase.gotrue.providers.builtin.Email
 import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.postgrest.rpc
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlin.time.Duration.Companion.seconds
@@ -23,45 +26,71 @@ class DatabaseHelper {
     private val maxRetries = 3
     private val initialRetryDelay = 2.seconds
 
+
+    // Обновляем функцию withRetry для обработки ограничений безопасности
     private suspend fun <T> withRetry(
         maxAttempts: Int = maxRetries,
         block: suspend () -> T
     ): T {
         var currentDelay = initialRetryDelay
+        var lastException: Exception? = null
+
         repeat(maxAttempts) { attempt ->
             try {
                 return block()
             } catch (e: RestException) {
-                if (e.message?.contains("Too Many Requests") == true) {
-                    if (attempt == maxAttempts - 1) throw e
-                    println("Rate limit exceeded, waiting ${currentDelay.inWholeSeconds} seconds...")
-                    delay(currentDelay)
-                    currentDelay *= 2
-                } else {
-                    throw e
+                lastException = e
+                when {
+                    e.message?.contains("security purposes") == true -> {
+                        if (attempt == maxAttempts - 1) throw e
+                        println("Security delay required, waiting 60 seconds...")
+                        delay(60000) // 60 секунд
+                    }
+                    e.message?.contains("Too Many Requests") == true -> {
+                        if (attempt == maxAttempts - 1) throw e
+                        println("Rate limit exceeded, waiting ${currentDelay.inWholeSeconds} seconds...")
+                        delay(currentDelay)
+                        currentDelay *= 2
+                    }
+                    else -> throw e
                 }
             }
         }
-        throw Exception("Превышено максимальное количество попыток")
+        throw lastException ?: Exception("Превышено максимальное количество попыток")
     }
+
 
     suspend fun registerUser(email: String, password: String) {
         try {
             withContext(Dispatchers.IO) {
                 println("Attempting to register user with email: $email")
 
-                // Регистрация пользователя в Supabase
+                // Проверяем, существует ли пользователь
+                val existingUser = supabase.postgrest
+                    .from("users")
+                    .select {
+                        eq("email", email)
+                    }
+                    .decodeList<UserProfile>()
+                    .firstOrNull()
+
+                if (existingUser != null) {
+                    throw Exception("Этот email уже зарегистрирован")
+                }
+
+                // Регистрация пользователя в Supabase без верификации email
                 withRetry {
                     supabase.gotrue.signUpWith(Email) {
                         this.email = email
                         this.password = password
+                        // Устанавливаем email как уже подтверждённый
                         data = buildJsonObject {
                             put("email_verified", true)
                         }
                     }
                 }
 
-                // Выполняем вход для получения сессии
+                // Сразу выполняем вход
                 withRetry {
                     supabase.gotrue.loginWith(Email) {
                         this.email = email
@@ -69,12 +98,12 @@ class DatabaseHelper {
                     }
                 }
 
-                // Получаем текущую сессию
+                // Получаем ID пользователя
                 val session = supabase.gotrue.currentSessionOrNull()
                 val userId = session?.user?.id
                     ?: throw Exception("Не удалось получить ID пользователя")
 
-                // Сохраняем дополнительные данные пользователя
+                // Сохраняем данные пользователя
                 insertUserData(userId, email)
 
                 println("User registered successfully with email: $email and ID: $userId")
@@ -82,24 +111,20 @@ class DatabaseHelper {
         } catch (e: RestException) {
             when {
                 e.message?.contains("User already registered") == true -> {
-                    println("User already registered: $email")
                     throw Exception("Этот email уже зарегистрирован")
                 }
-
                 e.message?.contains("Too Many Requests") == true -> {
-                    throw Exception("Сервис временно недоступен. Пожалуйста, попробуйте позже")
+                    throw Exception("Пожалуйста, попробуйте позже")
                 }
-
                 else -> {
-                    println("Error during registration: ${e.message}")
-                    throw Exception("Ошибка при регистрации: ${e.message}")
+                    throw Exception("подтвердите почту и возращайтесь: ${e.message}")
                 }
             }
         } catch (e: Exception) {
-            println("General error during registration: ${e.message}")
-            throw Exception("Ошибка при регистрации: ${e.message}")
+            throw Exception("подтвердите почту: ${e.message}")
         }
     }
+
 
     suspend fun insertUserData(userId: String, email: String) {
         if (userId.isBlank()) {
@@ -166,10 +191,10 @@ class DatabaseHelper {
         return supabase.gotrue.currentSessionOrNull()?.user?.email
     }
 
-    // Добавьте константу для JSON конфигурации
     private val json = Json {
         ignoreUnknownKeys = true
         coerceInputValues = true
+        isLenient = true
     }
 
     suspend fun saveTemperatureUnit(userId: String, unit: String) {
@@ -231,6 +256,70 @@ class DatabaseHelper {
             "C" // Возвращаем Цельсий по умолчанию в случае ошибки
         }
     }
+
+    suspend fun getUserProfile(userId: String): UserProfile {
+        return withContext(Dispatchers.IO) {
+            withRetry {
+                try {
+                    val response = supabase.postgrest
+                        .from("users")
+                        .select() {
+                            eq("user_id", userId)
+                        }
+                        .decodeList<UserProfile>()
+                        .firstOrNull() ?: throw Exception("Профиль пользователя не найден")
+
+                    response
+                } catch (e: SerializationException) {
+                    Log.e("DatabaseHelper", "Serialization error: ${e.message}")
+                    throw Exception("Ошибка при чтении данных пользователя: ${e.message}")
+                } catch (e: Exception) {
+                    Log.e("DatabaseHelper", "Error getting user profile: ${e.message}")
+                    throw e
+                }
+            }
+        }
+    }
+    suspend fun deleteUserData(userId: String) {
+        withContext(Dispatchers.IO) {
+            withRetry {
+                try {
+                    // Сначала выходим из системы
+                    supabase.gotrue.logout()
+
+                    // Затем удаляем данные
+                    supabase.postgrest
+                        .from("UserSettings")
+                        .delete {
+                            eq("user_id", userId)
+                        }
+
+                    supabase.postgrest
+                        .from("users")
+                        .delete {
+                            eq("user_id", userId)
+                        }
+
+                    // В конце удаляем пользователя через RPC
+                    val params = buildJsonObject {
+                        put("user_id", userId)
+                    }
+
+                    supabase.postgrest
+                        .rpc("delete_auth_user", params)
+
+                } catch (e: Exception) {
+                    Log.e("DatabaseHelper", "Error deleting user: ${e.message}")
+                    throw Exception("Ошибка при удалении аккаунта: ${e.message}")
+                }
+            }
+        }
+    }
+    @Serializable
+    data class DeleteUserResponse(
+        val success: Boolean = true
+    )
+
 
     @Serializable
     data class UserSettings(
