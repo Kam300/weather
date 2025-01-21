@@ -62,8 +62,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.roundToInt
 
-private lateinit var fusedLocationClient: FusedLocationProviderClient
-private val currentVersion = "1.1.0"
+
 
 class MainActivity : AppCompatActivity() {
     private lateinit var cityText: TextView

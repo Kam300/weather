@@ -35,17 +35,13 @@
         <activity
             android:name=".UserActivity"
             android:exported="false" />
+
+
         <activity
-
             android:name=".login.LoginActivity"
-            android:exported="true"
-            android:label="@string/title_activity_login">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+            android:exported="false" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity> <!-- Метаданные для Яндекс Рекламы -->
+         <!-- Метаданные для Яндекс Рекламы -->
         <meta-data
             android:name="com.yandex.mobile.ads.AUTOMATIC_SDK_INITIALIZATION"
             android:value="false" />
@@ -63,13 +59,27 @@
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize"
-            android:exported="true"></activity>
+            android:exported="true">
+
+        </activity>
         <activity
             android:name=".InformationActivity"
             android:exported="true" />
         <activity  android:name=".RegistrationActivity"
             android:exported="true" />
 
+
+        <activity
+            android:name=".SplashActivity"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
+
+
 
 </manifest>
